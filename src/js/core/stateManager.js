@@ -94,3 +94,19 @@ export function toggleAiPanel() {
     State.isAiOpen = !State.isAiOpen;
     notify('isAiOpen');
 }
+
+/**
+ * Aggiorna i byte binari del documento in seguito a modifiche vettoriali
+ * @param {Uint8Array} newBytes Nuovi byte del documento
+ * @param {Object} options Opzioni aggiuntive (nuove pagine totali, pagina bersaglio)
+ */
+export function updateDocumentBytes(newBytes, options = {}) {
+    State.pdfBytes = newBytes;
+    if (typeof options.totalPages === 'number') {
+        State.totalPages = options.totalPages;
+    }
+    if (typeof options.targetPage === 'number') {
+        State.currentPage = Math.min(Math.max(1, options.targetPage), State.totalPages);
+    }
+    notify('documentModified');
+}

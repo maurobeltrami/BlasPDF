@@ -6,6 +6,7 @@
     <title>BlasPDF - Suite Locale Manipolazione e Correzione PDF</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/thumbnails.css">
     <link rel="stylesheet" href="css/toolbar.css">
     <link rel="stylesheet" href="css/themes/modern.css">
 </head>
@@ -17,6 +18,11 @@
             <div class="toolbar-separator"></div>
             <button id="btnOpen" class="tool-btn primary" title="Apri file PDF (Cmd+O)">📂 Apri PDF</button>
             <button id="btnSave" class="tool-btn" title="Esporta PDF modificato (Cmd+S)">💾 Salva Modifiche</button>
+            <div class="toolbar-separator"></div>
+            <button id="btnRotatePage" class="tool-btn" title="Ruota pagina corrente di 90° (R)">⟳ Ruota</button>
+            <button id="btnMergePdf" class="tool-btn" title="Unisci un altro PDF in coda">➕ Unisci PDF</button>
+            <button id="btnExtractPage" class="tool-btn" title="Estrai pagina corrente come nuovo PDF">✂️ Estrai</button>
+            <button id="btnDeletePage" class="tool-btn" title="Elimina pagina corrente">🗑️ Elimina</button>
         </div>
 
         <div class="toolbar-group">
@@ -58,7 +64,10 @@
                     <p style="font-size: 13px; max-width: 360px;">
                         I tuoi file vengono aperti ed elaborati al 100% in locale sul tuo computer, senza connessione cloud o abbonamenti.
                     </p>
-                    <button class="tool-btn primary" style="margin-top: 8px;">Sfoglia Documenti</button>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button id="btnBrowseEmpty" class="tool-btn primary">Sfoglia Documenti</button>
+                        <button id="btnLoadSample" class="tool-btn" style="border-color: var(--border-light);">📄 Prova Esempio</button>
+                    </div>
                 </div>
             </div>
             
@@ -79,8 +88,9 @@
         </aside>
     </main>
 
-    <!-- Input file nascosto per fallback browser -->
-    <input type="file" id="hiddenFileInput" accept="application/pdf" style="display: none;">
+    <!-- Input file nascosti per apertura e unione documenti (compatibilità WebKit) -->
+    <input type="file" id="hiddenFileInput" accept="application/pdf" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
+    <input type="file" id="mergeFileInput" accept="application/pdf" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
 
     <script type="module" src="js/app.js"></script>
 </body>

@@ -59,4 +59,9 @@ npm run build
 BlasPDF rispetta rigorosamente:
 * 📜 **[Costituzione Generale BlasOpen](../../COSTITUZIONE.md)**
 * 📜 **[Regole AI e Limite 150 Righe (AGENTS.md)](AGENTS.md)**
-* 📚 **[Documentazione Didattica e Teoria](docs/)**
+* 📚 **[Documentazione Didattica e Teoria (docs/)](docs/)**
+  * [01. Anatomia e Struttura a Basso Livello del Formato PDF](docs/01_struttura_file_pdf.md)
+  * [02. Rendering Vettoriale su Canvas e Gestione HiDPI Retina](docs/02_rendering_canvas.md)
+  * [03. Manipolazione Pagine: Merge, Split, Rotazione e Albero COS](docs/03_manipolazione_pagine.md)
+  * [04. Tecnologie Utilizzate e Scelte Architetturali](docs/tecnologie_utilizzate.md)
+* 📖 **[Manuale Utente Ufficiale (docs/manuali/manuale_utente.md)](docs/manuali/manuale_utente.md)**

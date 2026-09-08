@@ -1,5 +1,7 @@
 # Build artifacts di Rust e Tauri
 src-tauri/target/
+src-tauri/gen/schemas/
+BlasPDF.app
 
 # Node.js
 node_modules/

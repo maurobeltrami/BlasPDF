@@ -31,7 +31,6 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    transition: width 0.2s ease;
 }
 
 /* Area principale visualizzazione e viewport centrale */
@@ -64,7 +63,7 @@ body {
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
+    transition: width 0.25s ease;
 }
 
 .ai-side-panel.collapsed {

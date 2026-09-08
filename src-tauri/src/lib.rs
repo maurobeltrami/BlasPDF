@@ -1,5 +1,6 @@
 // lib.rs - Inizializzazione della libreria Tauri per BlasPDF
 pub mod commands;
+pub mod utils;
 
 /// Configura ed avvia l'ecosistema Tauri per BlasPDF
 pub fn run() {
@@ -7,7 +8,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
-            commands::get_default_docs_dir,
+            commands::pick_and_read_pdf,
+            commands::pick_and_save_pdf,
             commands::read_pdf_file,
             commands::save_pdf_file,
         ])
