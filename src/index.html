@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlasPDF - Suite Locale Manipolazione e Correzione PDF</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/toolbar.css">
+    <link rel="stylesheet" href="css/themes/modern.css">
+</head>
+<body class="theme-modern">
+    <!-- BARRA DEGLI STRUMENTI SUPERIORE -->
+    <header class="main-toolbar">
+        <div class="toolbar-group">
+            <div class="brand-badge">Blas<span>PDF</span> <span class="badge-pill">Local-First</span></div>
+            <div class="toolbar-separator"></div>
+            <button id="btnOpen" class="tool-btn primary" title="Apri file PDF (Cmd+O)">📂 Apri PDF</button>
+            <button id="btnSave" class="tool-btn" title="Esporta PDF modificato (Cmd+S)">💾 Salva Modifiche</button>
+        </div>
+
+        <div class="toolbar-group">
+            <button id="btnPrevPage" class="tool-btn" title="Pagina precedente">◀</button>
+            <span id="pageIndicator" class="page-indicator">- / -</span>
+            <button id="btnNextPage" class="tool-btn" title="Pagina successiva">▶</button>
+            <div class="toolbar-separator"></div>
+            <button id="btnZoomOut" class="tool-btn" title="Riduci zoom">-</button>
+            <span id="zoomIndicator" class="zoom-indicator">100%</span>
+            <button id="btnZoomIn" class="tool-btn" title="Aumenta zoom">+</button>
+        </div>
+
+        <div class="toolbar-group">
+            <button id="toolSelect" class="tool-btn active" title="Strumento Selezione">👆 Cursore</button>
+            <button id="toolWhiteout" class="tool-btn" title="Strumento Bianchetto (Copertura)">🖍️ Bianchetto</button>
+            <button id="toolText" class="tool-btn" title="Aggiungi Testo">✍️ Testo</button>
+            <button id="toolSign" class="tool-btn" title="Apponi Firma">✒️ Firma</button>
+            <div class="toolbar-separator"></div>
+            <button id="btnToggleAi" class="tool-btn" title="Apri Agente AI Locale (Ollama)">🤖 Agente AI</button>
+        </div>
+    </header>
+
+    <!-- AREA DI LAVORO A TRE PANNELLI -->
+    <main class="app-container">
+        <!-- Pannello Miniature Pagine Sinistro -->
+        <aside id="sidebarThumbnails" class="sidebar-thumbnails">
+            <div style="padding: 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Pagine Documento
+            </div>
+            <div id="thumbnailsList" style="display: flex; flex-direction: column; gap: 12px; padding: 0 12px 24px 12px;"></div>
+        </aside>
+
+        <!-- Viewport Centrale con Foglio e Canvas PDF -->
+        <section id="mainViewport" class="main-viewport">
+            <div id="emptyDropState" class="empty-state">
+                <div class="drop-zone-border" id="dropZoneTrigger">
+                    <div style="font-size: 48px;">📄</div>
+                    <h2>Trascina qui il tuo documento PDF</h2>
+                    <p style="font-size: 13px; max-width: 360px;">
+                        I tuoi file vengono aperti ed elaborati al 100% in locale sul tuo computer, senza connessione cloud o abbonamenti.
+                    </p>
+                    <button class="tool-btn primary" style="margin-top: 8px;">Sfoglia Documenti</button>
+                </div>
+            </div>
+            
+            <div id="pdfCanvasWrapper" class="pdf-canvas-container" style="display: none;">
+                <canvas id="pdfCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Pannello Laterale Agente AI (Destro, inizialmente compresso) -->
+        <aside id="aiSidePanel" class="ai-side-panel collapsed">
+            <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-size: 14px;">🤖 Agente AI</strong>
+                <span class="badge-pill" style="border-color: var(--accent-green); color: var(--accent-green); background: rgba(46, 196, 182, 0.1);">Ollama Locale</span>
+            </div>
+            <div id="aiChatMessages" style="flex: 1; padding: 16px; overflow-y: auto; font-size: 13px; color: var(--text-secondary);">
+                L'assistente AI locale ti aiuterà a riassumere, analizzare o correggere il testo del documento senza inviare alcun dato all'esterno.
+            </div>
+        </aside>
+    </main>
+
+    <!-- Input file nascosto per fallback browser -->
+    <input type="file" id="hiddenFileInput" accept="application/pdf" style="display: none;">
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

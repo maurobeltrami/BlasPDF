@@ -1,0 +1,74 @@
+/* layout.css - Struttura e griglia a tre pannelli per l'area di lavoro */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+.app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Pannello laterale miniature sinistro */
+.sidebar-thumbnails {
+    width: var(--sidebar-width);
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transition: width 0.2s ease;
+}
+
+/* Area principale visualizzazione e viewport centrale */
+.main-viewport {
+    flex: 1;
+    background-color: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: auto;
+    padding: 24px;
+    position: relative;
+}
+
+/* Contenitore foglio PDF con ombreggiatura naturale */
+.pdf-canvas-container {
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    border-radius: var(--radius-sm);
+    position: relative;
+    margin-bottom: 30px;
+    transition: transform 0.15s ease-out;
+}
+
+/* Pannello laterale Agente AI destro (a comparsa) */
+.ai-side-panel {
+    width: var(--ai-panel-width);
+    background-color: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
+}
+
+.ai-side-panel.collapsed {
+    width: 0;
+    overflow: hidden;
+    border-left: none;
+}

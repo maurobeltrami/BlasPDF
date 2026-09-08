@@ -1,0 +1,101 @@
+/* toolbar.css - Barra degli strumenti superiore e comandi rapidi */
+.main-toolbar {
+    height: var(--header-height);
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 100;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tool-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.tool-btn:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-light);
+}
+
+.tool-btn.active {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.tool-btn.primary {
+    background-color: var(--accent-red);
+    color: #ffffff;
+}
+
+.tool-btn.primary:hover {
+    background-color: var(--accent-red-hover);
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+    margin: 0 4px;
+}
+
+/* Indicatore pagina corrente e zoom */
+.page-indicator, .zoom-indicator {
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Messaggio di stato o drag and drop vuoto */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 40px;
+}
+
+.empty-state h2 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.drop-zone-border {
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background-color: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.drop-zone-border:hover {
+    border-color: var(--accent-blue);
+}

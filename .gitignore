@@ -1,0 +1,19 @@
+# Build artifacts di Rust e Tauri
+src-tauri/target/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistemi operativi ed editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# File di output temporanei di test
+*.pdf.bak
+test_output/

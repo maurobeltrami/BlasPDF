@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# blaspdf - Script Launcher Desktop Zero-Terminal per macOS e Linux
+# ==============================================================================
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$DIR"
+
+# Controlla se esiste il bundle nativo già compilato
+if [ -d "src-tauri/target/debug/bundle/macos/BlasPDF.app" ]; then
+    open "src-tauri/target/debug/bundle/macos/BlasPDF.app"
+elif [ -d "src-tauri/target/release/bundle/macos/BlasPDF.app" ]; then
+    open "src-tauri/target/release/bundle/macos/BlasPDF.app"
+else
+    # Avvia in modalità sviluppo locale rapida
+    echo "🚀 Avvio di BlasPDF in modalità desktop..."
+    npx tauri dev
+fi
