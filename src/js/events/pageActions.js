@@ -3,7 +3,7 @@ import { State, updateDocumentBytes } from '../core/stateManager.js';
 import { loadPdf, renderPage } from '../core/pdfRenderer.js';
 import { rotatePage, deletePage, mergePdfs, extractPages } from '../core/pdfModifier.js';
 import { generateThumbnails } from '../ui/pageThumbnails.js';
-import { base64ToUint8Array } from './exportManager.js';
+import { base64ToUint8Array, uint8ArrayToBase64 } from './exportManager.js';
 
 function ensureDocumentLoaded() {
     if (!State.pdfBytes || State.totalPages === 0) {
@@ -32,10 +32,7 @@ export async function rotateCurrentPage() {
  */
 export async function deleteCurrentPage() {
     if (!ensureDocumentLoaded()) return;
-    if (State.totalPages <= 1) {
-        alert("Impossibile eliminare l'unica pagina del documento.");
-        return;
-    }
+    if (State.totalPages <= 1) return alert("Impossibile eliminare l'unica pagina del documento.");
     if (!confirm(`Confermi l'eliminazione definitiva della Pagina ${State.currentPage}?`)) return;
 
     try {
@@ -59,10 +56,7 @@ export async function handleMergePdf() {
     if (invoke) {
         try {
             const res = await invoke('pick_and_read_pdf');
-            if (res) {
-                const bytes = base64ToUint8Array(res.base64_data);
-                await executeMerge(bytes);
-            }
+            if (res) await executeMerge(base64ToUint8Array(res.base64_data));
             return;
         } catch (err) {
             console.warn('Fallback a input web per unione PDF:', err);
@@ -102,23 +96,40 @@ export async function mergeSecondaryPdf(file) {
 }
 
 /**
- * Estrae la pagina corrente e avvia il download locale di un nuovo file PDF (Split)
+ * Estrae la pagina corrente e la salva come nuovo file PDF autonomo (Split)
  */
 export async function extractCurrentPage() {
     if (!ensureDocumentLoaded()) return;
     try {
         const pageIdx = State.currentPage - 1;
         const newBytes = await extractPages(State.pdfBytes, [pageIdx]);
+        const suggestedName = `${(State.fileName || 'documento').replace(/\.pdf$/i, '')}_pagina_${State.currentPage}.pdf`;
+
+        // 1. Percorso Nativo Desktop tramite dialogo di sistema macOS
+        const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke;
+        if (invoke) {
+            const base64 = uint8ArrayToBase64(newBytes);
+            const savedPath = await invoke('pick_and_save_pdf', {
+                suggestedName,
+                base64Data: base64
+            });
+            if (savedPath) {
+                alert(`Pagina ${State.currentPage} estratta e salvata in:\n${savedPath}`);
+            }
+            return;
+        }
+
+        // 2. Fallback Browser Web
         const blob = new Blob([newBytes], { type: 'application/pdf' });
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${(State.fileName || 'documento').replace(/\.pdf$/i, '')}_pagina_${State.currentPage}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const link = Object.assign(document.createElement('a'), { href: url, download: suggestedName });
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(downloadUrl);
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
     } catch (err) {
         console.error("Errore durante l'estrazione della pagina:", err);
-        alert("Impossibile estrarre la pagina.");
+        alert(`Impossibile estrarre la pagina: ${err.message || err}`);
     }
 }
 
