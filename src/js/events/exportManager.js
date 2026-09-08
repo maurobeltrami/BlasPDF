@@ -1,5 +1,5 @@
-// exportManager.js - Gestore del salvataggio ed esportazione file PDF (nativo Tauri e Web)
-import { State } from '../core/stateManager.js';
+import { State, updateDocumentBytes, setIsModified } from '../core/stateManager.js';
+import { bakeAnnotationsToPdf } from '../core/annotationEngine.js';
 
 /**
  * Converte un buffer Uint8Array in stringa Base64
@@ -32,26 +32,31 @@ export function base64ToUint8Array(base64) {
 export async function saveCurrentPdf() {
     if (!State.pdfBytes || State.totalPages === 0) {
         alert('Nessun documento PDF aperto da salvare.');
-        return;
+        return false;
     }
 
     const defaultName = State.fileName ? `modificato_${State.fileName}` : 'documento_modificato.pdf';
+    const finalBytes = await bakeAnnotationsToPdf(State.pdfBytes);
+    updateDocumentBytes(finalBytes);
 
     // 1. Percorso Nativo Desktop (Tauri 2)
     const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke;
     if (invoke) {
         try {
-            const base64 = uint8ArrayToBase64(State.pdfBytes);
+            const base64 = uint8ArrayToBase64(finalBytes);
             const savedPath = await invoke('pick_and_save_pdf', {
                 suggestedName: defaultName,
                 base64Data: base64
             });
             if (savedPath) {
+                setIsModified(false);
                 alert(`File salvato con successo:\n${savedPath}`);
+                return true;
             }
-            return;
+            return false;
         } catch (err) {
             console.error('Errore salvataggio nativo Tauri:', err);
+            return false;
         }
     }
 
@@ -63,4 +68,6 @@ export async function saveCurrentPdf() {
     link.download = defaultName;
     link.click();
     URL.revokeObjectURL(url);
+    setIsModified(false);
+    return true;
 }

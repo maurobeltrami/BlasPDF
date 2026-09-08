@@ -1,35 +1,33 @@
 // app.js - Coordinamento eventi, strumenti della barra e comandi desktop
-import { State, subscribe, setCurrentPage, adjustZoom, setActiveTool, toggleAiPanel } from './core/stateManager.js';
+import { State, subscribe, setCurrentPage, adjustZoom } from './core/stateManager.js';
 import { renderPage } from './core/pdfRenderer.js';
 import { updateActiveThumbnail } from './ui/pageThumbnails.js';
 import { openPdfFile, loadSamplePdf, handleFileSelection, isPdfFile, processPdfBuffer } from './events/fileLoader.js';
 import { saveCurrentPdf, base64ToUint8Array } from './events/exportManager.js';
 import { rotateCurrentPage, deleteCurrentPage, extractCurrentPage, handleMergePdf, mergeSecondaryPdf } from './events/pageActions.js';
+import { initToolManager, updateToolUi } from './tools/toolManager.js';
+import { renderOverlay } from './core/annotationEngine.js';
+import { initCloseHandler } from './events/closeHandler.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Elementi interfaccia
-    const btnOpen = document.getElementById('btnOpen');
-    const btnSave = document.getElementById('btnSave');
-    const btnPrevPage = document.getElementById('btnPrevPage');
-    const btnNextPage = document.getElementById('btnNextPage');
-    const btnZoomOut = document.getElementById('btnZoomOut');
-    const btnZoomIn = document.getElementById('btnZoomIn');
-    const btnToggleAi = document.getElementById('btnToggleAi');
     const pdfCanvas = document.getElementById('pdfCanvas');
     const mergeInput = document.getElementById('mergeFileInput');
     const fileInput = document.getElementById('hiddenFileInput');
 
+    // 1. Inizializza gestore strumenti grafici e intercettazione chiusura
+    initToolManager();
+    initCloseHandler();
+
     // 2. Apertura e Salvataggio (Nativo Tauri + Fallback Web)
-    btnOpen?.addEventListener('click', openPdfFile);
-    btnSave?.addEventListener('click', saveCurrentPdf);
+    document.getElementById('btnOpen')?.addEventListener('click', openPdfFile);
+    document.getElementById('btnSave')?.addEventListener('click', saveCurrentPdf);
     document.getElementById('btnBrowseEmpty')?.addEventListener('click', openPdfFile);
     document.getElementById('btnLoadSample')?.addEventListener('click', loadSamplePdf);
-
     fileInput?.addEventListener('change', (e) => {
         if (e.target.files?.[0]) handleFileSelection(e.target.files[0]);
     });
 
-    // 3. Strumenti manipolazione pagine (Reattività diretta senza ritardi)
+    // 3. Strumenti manipolazione pagine
     document.getElementById('btnRotatePage')?.addEventListener('click', rotateCurrentPage);
     document.getElementById('btnDeletePage')?.addEventListener('click', deleteCurrentPage);
     document.getElementById('btnExtractPage')?.addEventListener('click', extractCurrentPage);
@@ -38,29 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.files?.[0]) mergeSecondaryPdf(e.target.files[0]);
     });
 
-    // 4. Strumenti barra superiore e cambio cursore
-    const tools = {
-        select: document.getElementById('toolSelect'),
-        whiteout: document.getElementById('toolWhiteout'),
-        text: document.getElementById('toolText'),
-        sign: document.getElementById('toolSign')
-    };
-    Object.entries(tools).forEach(([name, btn]) => {
-        if (btn) btn.addEventListener('click', () => setActiveTool(name));
-    });
+    // 4. Navigazione e Zoom
+    document.getElementById('btnPrevPage')?.addEventListener('click', () => setCurrentPage(State.currentPage - 1));
+    document.getElementById('btnNextPage')?.addEventListener('click', () => setCurrentPage(State.currentPage + 1));
+    document.getElementById('btnZoomOut')?.addEventListener('click', () => adjustZoom(-0.15));
+    document.getElementById('btnZoomIn')?.addEventListener('click', () => adjustZoom(0.15));
 
-    // 5. Navigazione e Zoom
-    btnPrevPage?.addEventListener('click', () => setCurrentPage(State.currentPage - 1));
-    btnNextPage?.addEventListener('click', () => setCurrentPage(State.currentPage + 1));
-    btnZoomOut?.addEventListener('click', () => adjustZoom(-0.15));
-    btnZoomIn?.addEventListener('click', () => adjustZoom(0.15));
-    btnToggleAi?.addEventListener('click', () => toggleAiPanel());
-
-    // 6. Drag & Drop Universale (Nativo macOS Finder + WebKit HTML5)
+    // 5. Drag & Drop Universale (Nativo macOS Finder + WebKit HTML5)
     ['dragenter', 'dragover'].forEach(evt => {
         window.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
     });
-
     window.addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -68,26 +53,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPdfFile(file)) handleFileSelection(file);
     });
 
-    // Ascolto eventi di rilascio file nativi di Tauri da Finder macOS
+    // Rilascio file nativo Tauri da Finder macOS
     const tauriEvent = window.__TAURI__?.event;
     if (tauriEvent?.listen) {
         const onNativeDrop = async (e) => {
             const paths = e.payload?.paths || e.payload;
-            if (Array.isArray(paths) && paths.length > 0) {
-                const path = paths[0];
-                if (typeof path === 'string' && path.toLowerCase().endsWith('.pdf')) {
-                    const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke;
-                    if (invoke) {
-                        try {
-                            const res = await invoke('read_pdf_file', { filePath: path });
-                            if (res) {
-                                const bytes = base64ToUint8Array(res.base64_data);
-                                await processPdfBuffer(bytes, res.file_name, res.file_path);
-                            }
-                        } catch (err) {
-                            console.error('Errore caricamento drop nativo:', err);
+            if (Array.isArray(paths) && paths.length > 0 && typeof paths[0] === 'string' && paths[0].toLowerCase().endsWith('.pdf')) {
+                const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke;
+                if (invoke) {
+                    try {
+                        const res = await invoke('read_pdf_file', { filePath: paths[0] });
+                        if (res) {
+                            const bytes = base64ToUint8Array(res.base64_data);
+                            await processPdfBuffer(bytes, res.file_name, res.file_path);
                         }
-                    }
+                    } catch (err) { console.error('Errore drop nativo:', err); }
                 }
             }
         };
@@ -95,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tauriEvent.listen('tauri://file-drop', onNativeDrop);
     }
 
-    // 7. Scorciatoie da tastiera intuitive (Zero-Terminal)
+    // 6. Scorciatoie da tastiera intuitive
     window.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.key === 'ArrowRight' || e.key === 'PageDown') setCurrentPage(State.currentPage + 1);
@@ -107,20 +87,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'o') { e.preventDefault(); openPdfFile(); }
     });
 
-    // 8. Reattività UI su mutazione stato
+    // 7. Reattività UI su mutazione stato
     subscribe(async (state, property) => {
-        if (property === 'currentPage' || property === 'zoomScale') {
+        if (property === 'currentPage' || property === 'zoomScale' || property === 'documentModified') {
             if (pdfCanvas && state.totalPages > 0) {
                 await renderPage(state.currentPage, pdfCanvas, state.zoomScale);
+                renderOverlay();
             }
-            if (property === 'currentPage') updateActiveThumbnail(state.currentPage);
+            if (property === 'currentPage' || property === 'documentModified') updateActiveThumbnail(state.currentPage);
         }
 
         if (property === 'currentPage' || property === 'documentLoaded') {
             const pageInd = document.getElementById('pageIndicator');
-            if (pageInd) {
-                pageInd.textContent = state.totalPages > 0 ? `Pagina ${state.currentPage} / ${state.totalPages}` : '- / -';
-            }
+            if (pageInd) pageInd.textContent = state.totalPages > 0 ? `Pagina ${state.currentPage} / ${state.totalPages}` : '- / -';
+            if (property === 'documentLoaded') renderOverlay();
         }
 
         if (property === 'zoomScale') {
@@ -129,18 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (property === 'activeTool') {
-            Object.entries(tools).forEach(([name, btn]) => {
-                if (btn) btn.classList.toggle('active', name === state.activeTool);
-            });
-            const wrapper = document.getElementById('pdfCanvasWrapper');
-            if (wrapper) {
-                wrapper.style.cursor = state.activeTool === 'whiteout' ? 'crosshair' : (state.activeTool === 'text' ? 'text' : 'default');
-            }
-        }
-
-        if (property === 'isAiOpen') {
-            document.getElementById('aiSidePanel')?.classList.toggle('collapsed', !state.isAiOpen);
-            btnToggleAi?.classList.toggle('active', state.isAiOpen);
+            updateToolUi(state.activeTool);
         }
     });
 

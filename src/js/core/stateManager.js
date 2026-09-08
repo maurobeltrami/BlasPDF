@@ -9,7 +9,8 @@ export const State = {
     zoomScale: 1.0,
     activeTool: 'select', // 'select' | 'whiteout' | 'text' | 'sign'
     isAiOpen: false,
-    modifications: {}, // Pagine modificate con annotazioni/bianchetto
+    isModified: false,
+    modifications: {},
 };
 
 const listeners = new Set();
@@ -54,6 +55,7 @@ export function setLoadedDocument({ fileName, filePath, pdfBytes, totalPages }) 
     State.totalPages = totalPages;
     State.currentPage = 1;
     State.zoomScale = 1.0;
+    State.isModified = false;
     notify('documentLoaded');
 }
 
@@ -96,15 +98,22 @@ export function toggleAiPanel() {
 }
 
 /**
+ * Imposta esplicitamente lo stato di modifica del documento
+ */
+export function setIsModified(val) {
+    State.isModified = val;
+    notify('isModified');
+}
+
+/**
  * Aggiorna i byte binari del documento in seguito a modifiche vettoriali
  * @param {Uint8Array} newBytes Nuovi byte del documento
  * @param {Object} options Opzioni aggiuntive (nuove pagine totali, pagina bersaglio)
  */
 export function updateDocumentBytes(newBytes, options = {}) {
     State.pdfBytes = newBytes;
-    if (typeof options.totalPages === 'number') {
-        State.totalPages = options.totalPages;
-    }
+    State.isModified = true;
+    if (typeof options.totalPages === 'number') State.totalPages = options.totalPages;
     if (typeof options.targetPage === 'number') {
         State.currentPage = Math.min(Math.max(1, options.targetPage), State.totalPages);
     }

@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/thumbnails.css">
     <link rel="stylesheet" href="css/toolbar.css">
+    <link rel="stylesheet" href="css/tools.css">
+    <link rel="stylesheet" href="css/textTool.css">
     <link rel="stylesheet" href="css/themes/modern.css">
 </head>
 <body class="theme-modern">
@@ -41,7 +43,8 @@
             <button id="toolText" class="tool-btn" title="Aggiungi Testo">✍️ Testo</button>
             <button id="toolSign" class="tool-btn" title="Apponi Firma">✒️ Firma</button>
             <div class="toolbar-separator"></div>
-            <button id="btnToggleAi" class="tool-btn" title="Apri Agente AI Locale (Ollama)">🤖 Agente AI</button>
+            <button id="btnUndo" class="tool-btn" title="Annulla annotazione (Cmd+Z)">↩ Annulla</button>
+            <button id="btnRedo" class="tool-btn" title="Ripristina annotazione (Cmd+Shift+Z)">↪ Ripristina</button>
         </div>
     </header>
 
@@ -71,22 +74,46 @@
                 </div>
             </div>
             
-            <div id="pdfCanvasWrapper" class="pdf-canvas-container" style="display: none;">
+            <div id="pdfCanvasWrapper" class="pdf-canvas-container" style="display: none; position: relative;">
                 <canvas id="pdfCanvas"></canvas>
+                <div id="annotationOverlay" class="annotation-overlay"></div>
             </div>
         </section>
-
-        <!-- Pannello Laterale Agente AI (Destro, inizialmente compresso) -->
-        <aside id="aiSidePanel" class="ai-side-panel collapsed">
-            <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                <strong style="font-size: 14px;">🤖 Agente AI</strong>
-                <span class="badge-pill" style="border-color: var(--accent-green); color: var(--accent-green); background: rgba(46, 196, 182, 0.1);">Ollama Locale</span>
-            </div>
-            <div id="aiChatMessages" style="flex: 1; padding: 16px; overflow-y: auto; font-size: 13px; color: var(--text-secondary);">
-                L'assistente AI locale ti aiuterà a riassumere, analizzare o correggere il testo del documento senza inviare alcun dato all'esterno.
-            </div>
-        </aside>
     </main>
+
+    <!-- Modale Apposizione Firma Grafica -->
+    <div id="signatureModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <span>✒️ Apponi la tua Firma Grafica</span>
+                <button id="btnCloseSigModal" class="tool-btn" style="padding: 2px 8px;">✕</button>
+            </div>
+            <div class="signature-pad-container">
+                <canvas id="signaturePad" class="signature-canvas"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button id="btnClearSig" class="tool-btn">Pulisci Tratto</button>
+                <button id="btnApplySig" class="tool-btn primary">Inserisci sul Foglio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Conferma Chiusura con Modifiche non Salvate -->
+    <div id="unsavedModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog" style="max-width: 440px;">
+            <div class="modal-header">
+                <span style="display: flex; align-items: center; gap: 8px;">⚠️ Modifiche non salvate</span>
+            </div>
+            <div style="padding: 18px; font-size: 13px; line-height: 1.5; color: var(--text-secondary);">
+                Il documento contiene modifiche non salvate. Vuoi salvare il lavoro prima di uscire da BlasPDF?
+            </div>
+            <div class="modal-footer" style="gap: 8px;">
+                <button id="btnUnsavedCancel" class="tool-btn">Annulla</button>
+                <button id="btnUnsavedDiscard" class="tool-btn" style="color: var(--accent-red); border-color: rgba(230,57,70,0.4);">Non Salvare</button>
+                <button id="btnUnsavedSave" class="tool-btn primary">💾 Salva ed Esci</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Input file nascosti per apertura e unione documenti (compatibilità WebKit) -->
     <input type="file" id="hiddenFileInput" accept="application/pdf" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">

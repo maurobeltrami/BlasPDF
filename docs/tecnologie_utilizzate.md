@@ -13,6 +13,9 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 ### ⚡ Tauri 2.0 (`tauri-apps`)
 * **Ruolo:** Framework multi-processo per applicazioni desktop native.
 * **Perché è stato scelto:** A differenza di Electron (che ingloba un'intera copia di Chromium e NodeJS consumando oltre 250 MB di RAM), Tauri sfrutta il motore Web nativo del sistema operativo (WebKit su macOS, WebView2 su Windows, WebKitGTK su Linux). Questo consente a BlasPDF di consumare appena **30-50 MB di RAM**.
+* **Gestione Nativa del Ciclo di Vita Finestra:**
+  * Intercettazione a basso livello dell'evento `WindowEvent::CloseRequested` nel backend Rust con `api.prevent_close()`.
+  * Dialogo bidirezionale via eventi IPC (`request_close_window` e `close_app`) per salvaguardare modifiche non salvate prima della chiusura.
 * **Plugin Utilizzati:**
   * `tauri-plugin-dialog`: Finestre di dialogo native di apertura/salvataggio file.
   * `tauri-plugin-fs`: Accesso al file system protetto e controllato da permessi.
@@ -24,11 +27,15 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 ### 🔴 Mozilla PDF.js (v4.10)
 * **Ruolo:** Motore di rasterizzazione e parsing di documenti PDF.
 * **Architettura:** Funzionamento disaccoppiato tramite Web Worker dedicato (`pdf.worker.min.mjs`), che garantisce il rendering continuo a 60 FPS senza bloccare i thread dell'interfaccia.
+* **Estrazione Baseline Testuale (Text Layer):** Parsing dell'albero dei token tramite `page.getTextContent()`. Calcolo geometrico della linea di base del font e della matrice affine di trasformazione:
+  $$\text{topDomY} = (ph - ty) - (\text{fontSize} \times 0.85)$$
 * **Integrazione Local-First:** Incluso direttamente nella directory `src/vendor/` per consentire il funzionamento al 100% offline, senza dipendenze da server o CDN esterni.
 
 ### 🟢 PDF-Lib (v1.17)
 * **Ruolo:** Motore di manipolazione vettoriale e mutazione dell'albero COS delle pagine.
-* **Funzionalità:** Unione di più PDF, divisione in fogli separati, estrazione, rotazione e inserimento permanente di rettangoli (bianchetto/redazione) e testi vettoriali.
+* **Funzionalità:** Unione di più PDF, divisione in fogli separati, estrazione, rotazione e inserimento permanente di rettangoli (bianchetto/redazione), testi vettoriali e firme grafiche.
+* **Font Vettoriali Standard ISO Type 1:** Utilizzo di `StandardFonts` (`Helvetica`, `TimesRoman`, `Courier` e varianti Bold). Garantisce testo vettoriale ultra-definito senza appesantire le dimensioni del file con incorporamento di interi set TrueType/WOFF.
+* **Firma Grafica HiDPI:** Disegno a mano libera vettorizzato con compensazione della densità di pixel dello schermo (`devicePixelRatio`) ed esportazione in stream PNG trasparente incorporato via `embedPng`.
 
 ---
 

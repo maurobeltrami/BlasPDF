@@ -13,7 +13,6 @@ export async function generateThumbnails(containerElement) {
     const token = ++currentGenToken;
     containerElement.innerHTML = '';
 
-    // 1. Creazione istantanea di tutte le schede (Feedback UI a 0ms)
     const cards = [];
     for (let i = 1; i <= State.totalPages; i++) {
         const card = createThumbnailCard(i, containerElement);
@@ -21,26 +20,19 @@ export async function generateThumbnails(containerElement) {
         cards.push(card);
     }
 
-    // 2. Rendering prioritario della pagina attiva, poi le altre in sequenza fluida
     const renderQueue = [State.currentPage, ...Array.from({ length: State.totalPages }, (_, i) => i + 1).filter(p => p !== State.currentPage)];
-
     for (const p of renderQueue) {
-        if (token !== currentGenToken) break; // Interrompi se è subentrata una nuova generazione
+        if (token !== currentGenToken) break;
         const card = cards[p - 1];
         if (!card) continue;
         const canvas = card.querySelector('.thumbnail-canvas');
         if (canvas) {
-            try {
-                await renderThumbnail(p, canvas, 140);
-            } catch (_) {}
+            try { await renderThumbnail(p, canvas, 140); } catch (_) {}
         }
-        await new Promise(r => setTimeout(r, 16)); // Cede il controllo al thread grafico (60fps)
+        await new Promise(r => setTimeout(r, 16));
     }
 }
 
-/**
- * Crea la scheda miniatura con comandi veloci e Drag & Drop
- */
 function createThumbnailCard(pageNum, container) {
     const card = document.createElement('div');
     card.className = `thumbnail-card ${pageNum === State.currentPage ? 'active' : ''}`;

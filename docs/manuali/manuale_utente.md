@@ -71,22 +71,44 @@ BlasPDF ti permette di organizzare i tuoi documenti con la massima semplicità, 
 
 ---
 
-## 🛠️ 6. Strumenti della Barra Superiore (Panoramica)
+## 🛠️ 6. Suite di Correzione e Modifica Intelligente (Fase 4)
 
-| Strumento | Icona | Descrizione |
-| :--- | :---: | :--- |
-| **Ruota** | `⟳ Ruota` | Ruota la pagina corrente di 90° in senso orario (Scorciatoia: tasto `R`). |
-| **Unisci** | `➕ Unisci PDF` | Accoda un altro file PDF al documento aperto. |
-| **Estrai** | `✂️ Estrai` | Salva la pagina corrente in un file PDF indipendente. |
-| **Elimina** | `🗑️ Elimina` | Cancella definitivamente la pagina visualizzata. |
-| **Cursore** | `👆 Cursore` | Modalità predefinita per scorrere il foglio ed evidenziare. |
-| **Bianchetto** | `🖍️ Bianchetto` | Copertura permanente di testo o dati confidenziali (in arrivo nella Fase 4). |
-| **Testo** | `✍️ Testo` | Digitazione di annotazioni e correzioni vettoriali sul documento. |
-| **Firma** | `✒️ Firma` | Apposizione di firma grafica a mano libera o timbro trasparente. |
-| **Agente AI** | `🤖 Agente AI` | Apertura del pannello laterale per chattare con l'IA locale Ollama. |
+BlasPDF integra una suite completa per correggere e annotare i documenti:
+
+* **🖍️ Bianchetto & Oscuramento (Redaction):**
+  * Seleziona lo strumento **`🖍️ Bianchetto`** e trascina un rettangolo sull'area da cancellare.
+  * Tieni premuto il tasto **`Shift`** o **`Alt`** durante il trascinamento per creare un rettangolo di censura **nero opaco**, ideale per dati riservati o oscuramento di fatture.
+* **✍️ Testo & Modifica Intelligente del Testo Esistente:**
+  * Seleziona lo strumento **`✍️ Testo`**.
+  * **Modifica testo esistente (Smart In-Place):** Fai semplicemente clic su una parola o frase del documento originale. BlasPDF individua automaticamente le coordinate esatte, applica un bianchetto di fondo invisibile e apre un campo di digitazione con il testo già selezionato e un menu fluttuante di formattazione.
+  * **Nuovo testo:** Fai clic su un punto vuoto del foglio per inserire un'annotazione ex novo.
+  * **Menu Formattazione Fluttuante:** Consente di scegliere la Famiglia di Caratteri (*Helvetica, Times-Roman, Courier*), la dimensione (10-48 pt), il grassetto (**B**) e la tavolozza colori (*Nero, Blu, Rosso, Verde, Bianco*). Conferma con **`✓ Salva`** o annulla con **`✕ Annulla`** (oppure premi `Invio` o `Esc`).
+* **✒️ Firma Grafica a Mano Libera:**
+  * Fai clic su **`✒️ Firma`** per aprire la finestra di tracciamento ad alta precisione (HiDPI Retina).
+  * Firma con mouse, trackpad o penna touch, premi **`Pulisci`** per cancellare o **`Usa Firma`** per incollarla sul foglio con trasparenza nativa.
+* **👆 Cursore & Spostamento:**
+  * Con lo strumento **`👆 Cursore`** attivo, puoi cliccare e trascinare qualsiasi firma o elemento inserito per riposizionarlo millimetricamente.
+* **↩ Annulla & ↪ Ripristina:**
+  * Fai clic sui pulsanti **`↩ Annulla`** e **`↪ Ripristina`** nella barra o usa le scorciatoie **`Cmd+Z`** / **`Cmd+Shift+Z`** (`Ctrl+Z` su Windows/Linux) per viaggiare nella cronologia delle modifiche.
 
 ---
 
-## 🔒 7. Privacy e Sovranità dei Dati
+## 💾 7. Salvataggio e Protezione Chiusura Finestra
+
+* **Salvataggio Documento:** Fai clic su **`💾 Salva PDF`** nella barra superiore per esportare il documento definitivo. Tutte le correzioni, firme e testi vengono integrati (*baked*) in formato vettoriale ad alta definizione.
+* **Chiusura Protetta con Rilevamento Modifiche:** Se provi a chiudere la finestra con modifiche non salvate, BlasPDF blocca la chiusura immediata e mostra una finestra di dialogo di sicurezza con tre scelte:
+  1. **`💾 Salva ed Esci`**: salva il file su disco e chiude l'app.
+  2. **`Non Salvare`**: chiude l'applicazione scartando le modifiche.
+  3. **`Annulla`**: torna all'editor per proseguire il lavoro.
+
+---
+
+## 🔒 8. Privacy e Sovranità dei Dati
 
 Tutti i documenti caricati in BlasPDF risiedono **esclusivamente nella memoria locale del tuo computer**. Nessun file viene inviato a server cloud, garantendo la totale conformità con la normativa sulla privacy e la massima protezione del segreto professionale.
+
+---
+
+## 🗺️ 9. Prossime Novità (Roadmap v1.1.0 & v2.0.0)
+
+Per consultare le specifiche architetturali delle future funzionalità in arrivo (inserimento immagini multi-formato, centro conversioni stile *iLovePDF* offline e assistente locale AI con Ollama), consulta il documento [Specifiche Tecniche Prossime Implementazioni](../prossime_implementazioni.md).

@@ -4,6 +4,7 @@ import { loadPdf, renderPage } from '../core/pdfRenderer.js';
 import { rotatePage, deletePage, mergePdfs, extractPages } from '../core/pdfModifier.js';
 import { generateThumbnails } from '../ui/pageThumbnails.js';
 import { base64ToUint8Array, uint8ArrayToBase64 } from './exportManager.js';
+import { bakeAnnotationsToPdf } from '../core/annotationEngine.js';
 
 function ensureDocumentLoaded() {
     if (!State.pdfBytes || State.totalPages === 0) {
@@ -102,20 +103,16 @@ export async function extractCurrentPage() {
     if (!ensureDocumentLoaded()) return;
     try {
         const pageIdx = State.currentPage - 1;
-        const newBytes = await extractPages(State.pdfBytes, [pageIdx]);
+        const baked = await bakeAnnotationsToPdf(State.pdfBytes);
+        const newBytes = await extractPages(baked, [pageIdx]);
         const suggestedName = `${(State.fileName || 'documento').replace(/\.pdf$/i, '')}_pagina_${State.currentPage}.pdf`;
 
         // 1. Percorso Nativo Desktop tramite dialogo di sistema macOS
         const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.invoke;
         if (invoke) {
             const base64 = uint8ArrayToBase64(newBytes);
-            const savedPath = await invoke('pick_and_save_pdf', {
-                suggestedName,
-                base64Data: base64
-            });
-            if (savedPath) {
-                alert(`Pagina ${State.currentPage} estratta e salvata in:\n${savedPath}`);
-            }
+            const savedPath = await invoke('pick_and_save_pdf', { suggestedName, base64Data: base64 });
+            if (savedPath) alert(`Pagina ${State.currentPage} estratta e salvata in:\n${savedPath}`);
             return;
         }
 

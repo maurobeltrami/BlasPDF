@@ -78,3 +78,10 @@ pub fn save_pdf_file(target_path: String, base64_data: String) -> Result<bool, S
     fs::write(&target_path, bytes).map_err(|e| format!("Impossibile salvare il file: {}", e))?;
     Ok(true)
 }
+
+/// Chiude l'applicazione in modo pulito e immediato
+#[tauri::command]
+pub fn close_app(app_handle: tauri::AppHandle) {
+    app_handle.exit(0);
+}
+

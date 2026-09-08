@@ -14,16 +14,24 @@ Sviluppata con un backend nativo in **Rust** su architettura **Tauri 2.0** e un'
 
 ---
 
-## ✨ Caratteristiche Principali
+## ✨ Caratteristiche Principali (v1.0.0)
 
 * **🚫 Lotta agli Abbonamenti:** Completa alternativa libera e gratuita ai costosi canoni mensili di Adobe Acrobat Pro.
 * **⚡ Regola Zero-Terminal:** Avvio istantaneo con doppio clic su `BlasPDF.app` o tramite `./blaspdf`. Nessun interprete esterno o comando richiesto all'utente finale.
-* **📑 Gestione e Riordino Pagine:** Unione di più PDF (Merge), divisione (Split), estrazione pagine, eliminazione e riordino visuale Drag & Drop con rotazione continua (90° / 180°).
-* **🖍️ Correzione & Bianchetto (Redaction):** Cancellazione e oscuramento indelebile di testo o dati sensibili con rettangolo di copertura bianco o nero.
-* **✍️ Testo Vettoriale & Firma:** Digitazione di nuovo testo direttamente sulla pagina e disegno/inserimento di firme grafiche o timbri trasparenti.
-* **🤖 Assistente AI Dual-Mode (Local-First):**
-  * **Ollama Locale (Default):** Q&A, riassunto ed estrazione dati sul documento eseguiti al 100% sulla tua macchina via Ollama (`localhost:11434`), senza connessione a internet.
-  * **Cloud Opzionale (con Avviso di Privacy):** Per chi non ha GPU locale, con banner esplicito di avviso prima dell'invio dei dati a server terzi.
+* **📑 Gestione e Riordino Pagine:** Unione di più PDF (Merge), divisione (Split), estrazione pagine singole, eliminazione sicura e riordino visuale Drag & Drop con rotazione continua (90° / 180°).
+* **🖍️ Correzione & Bianchetto (Redaction):** Cancellazione e oscuramento indelebile di testo o dati sensibili con rettangolo bianco o nero (tenendo premuto `Shift` o `Alt`).
+* **✍️ Modifica Testo Intelligente (In-Place):** Clicca su qualsiasi parola del documento originale per rilevarla all'istante, coprirla con bianchetto automatico e modificarla con menu fluttuante di stile (Font *Helvetica, Times, Courier*, dimensione, grassetto e palette colori).
+* **✒️ Firma Grafica HiDPI:** Disegno a mano libera con pennino fluido su canvas ad alta risoluzione Retina, con esportazione in PNG trasparente e trascinamento visuale sul foglio.
+* **↩️ Undo/Redo & Protezione Chiusura:** Cronologia completa annulla/ripristina (`Cmd+Z` / `Cmd+Shift+Z`) e intercettazione nativa della chiusura finestra con avviso salvataggio per modifiche pendenti.
+
+---
+
+## 🗺️ Roadmap & Prossime Versioni (v1.1.0 / v2.0.0)
+
+Consulta il documento di specifica tecnica dettagliata [docs/prossime_implementazioni.md](docs/prossime_implementazioni.md) per i dettagli su:
+1. **🖼️ Inserimento Immagini Multi-formato:** Timbri, loghi e firme esterne (PNG, JPG, WebP, SVG, BMP) con ridimensionamento proporzionale.
+2. **🔄 Centro Conversioni Offline (Stile iLovePDF):** Batch Immagini ➔ PDF, PDF ➔ Immagini alta risoluzione, PDF ➔ Testo puro, Ottimizzazione stream COS.
+3. **🤖 Assistente AI Locale (Local-First):** Integrazione con Ollama (`localhost:11434`) per Q&A e riassunti con streaming in tempo reale a zero violazioni della privacy.
 
 ---
 
@@ -63,5 +71,7 @@ BlasPDF rispetta rigorosamente:
   * [01. Anatomia e Struttura a Basso Livello del Formato PDF](docs/01_struttura_file_pdf.md)
   * [02. Rendering Vettoriale su Canvas e Gestione HiDPI Retina](docs/02_rendering_canvas.md)
   * [03. Manipolazione Pagine: Merge, Split, Rotazione e Albero COS](docs/03_manipolazione_pagine.md)
-  * [04. Tecnologie Utilizzate e Scelte Architetturali](docs/tecnologie_utilizzate.md)
+  * [04. Strumenti di Correzione, Redazione e Coordinate Vettoriali](docs/04_redazione_e_overlay.md)
+  * [Tecnologie Utilizzate e Scelte Architetturali](docs/tecnologie_utilizzate.md)
+  * [Specifiche Tecniche Prossime Implementazioni (Roadmap)](docs/prossime_implementazioni.md)
 * 📖 **[Manuale Utente Ufficiale (docs/manuali/manuale_utente.md)](docs/manuali/manuale_utente.md)**

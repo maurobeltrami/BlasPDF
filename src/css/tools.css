@@ -1,0 +1,128 @@
+/* tools.css - Stili per overlay annotazioni, strumenti grafici e modale firma */
+.annotation-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    overflow: visible;
+}
+
+#pdfCanvas {
+    display: block;
+}
+
+.annotation-item {
+    position: absolute;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+    pointer-events: none;
+}
+
+.annotation-overlay.tool-select-mode .annotation-item {
+    cursor: move;
+    pointer-events: auto;
+}
+
+.whiteout-box {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.whiteout-box.white { background-color: #ffffff; }
+.whiteout-box.black { background-color: #000000; }
+
+.text-box {
+    background: transparent;
+    border: 1px dashed transparent;
+    padding: 2px 4px;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #000000;
+    line-height: 1.2;
+    white-space: pre-wrap;
+    min-width: 30px;
+    min-height: 20px;
+}
+
+.text-box:hover, .text-box:focus {
+    border-color: var(--accent-blue);
+    background: rgba(77, 148, 255, 0.08);
+}
+
+.signature-box img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+.signature-box:hover {
+    outline: 1px dashed var(--accent-blue);
+}
+
+.draw-preview-rect {
+    position: absolute;
+    border: 1px dashed var(--accent-blue);
+    background: rgba(77, 148, 255, 0.2);
+    pointer-events: none;
+}
+
+/* Modale disegno firma grafica a mano libera */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-dialog {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90vw;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.signature-pad-container {
+    padding: 18px;
+    background: var(--bg-dark);
+}
+
+.signature-canvas {
+    width: 100%;
+    height: 220px;
+    background: #ffffff;
+    border-radius: 8px;
+    cursor: crosshair;
+    display: block;
+    touch-action: none;
+}
+
+.modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
