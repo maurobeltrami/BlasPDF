@@ -1,4 +1,4 @@
-/* imageTool.css - Stili per il riquadro immagine e maniglie angolari di ridimensionamento */
+/* imageTool.css - Stili per il riquadro immagine, maniglie di resize e pulsante elimina CRUD */
 .annotation-item.image-box {
     position: absolute;
     cursor: move;
@@ -40,26 +40,41 @@
     display: block;
 }
 
-.annotation-item.image-box .resize-handle.nw {
-    top: -5px;
-    left: -5px;
-    cursor: nwse-resize;
+.annotation-item.image-box .resize-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
+.annotation-item.image-box .resize-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
+.annotation-item.image-box .resize-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.annotation-item.image-box .resize-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+/* Pulsante rosso elimina immagine (CRUD) */
+.annotation-item.image-box .ann-del-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 20;
+    padding: 0;
+    transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.annotation-item.image-box .resize-handle.ne {
-    top: -5px;
-    right: -5px;
-    cursor: nesw-resize;
+.annotation-item.image-box .ann-del-btn:hover {
+    background: #dc2626;
+    transform: scale(1.15);
 }
 
-.annotation-item.image-box .resize-handle.sw {
-    bottom: -5px;
-    left: -5px;
-    cursor: nesw-resize;
-}
-
-.annotation-item.image-box .resize-handle.se {
-    bottom: -5px;
-    right: -5px;
-    cursor: nwse-resize;
+.tool-select-mode .annotation-item.image-box:hover .ann-del-btn,
+.annotation-item.image-box.active .ann-del-btn {
+    display: flex;
 }
