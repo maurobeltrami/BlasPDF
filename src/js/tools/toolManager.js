@@ -2,7 +2,7 @@
 import { State, setActiveTool } from '../core/stateManager.js';
 import { undo, redo } from '../core/annotationEngine.js';
 import { initWhiteoutTool } from './whiteoutTool.js';
-import { initTextTool } from './textTool.js';
+import { initTextTool, commitActiveText } from './textTool.js';
 import { initSignatureTool, openSignatureDialog } from './signatureTool.js';
 import { initImageTool, openImageDialog } from './imageTool.js';
 
@@ -25,6 +25,7 @@ export function initToolManager() {
     Object.entries(tools).forEach(([name, btn]) => {
         if (!btn) return;
         btn.addEventListener('click', () => {
+            commitActiveText();
             setActiveTool(name);
             if (name === 'sign') openSignatureDialog();
             if (name === 'image') openImageDialog();

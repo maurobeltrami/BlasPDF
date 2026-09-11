@@ -1,5 +1,6 @@
 import { State, updateDocumentBytes, setIsModified } from '../core/stateManager.js';
 import { bakeAnnotationsToPdf } from '../core/annotationEngine.js';
+import { commitActiveText } from '../tools/textTool.js';
 
 /**
  * Converte un buffer Uint8Array in stringa Base64
@@ -30,6 +31,7 @@ export function base64ToUint8Array(base64) {
  * Salva il documento PDF modificato su disco (dialogo nativo Tauri o download browser)
  */
 export async function saveCurrentPdf() {
+    commitActiveText();
     if (!State.pdfBytes || State.totalPages === 0) {
         alert('Nessun documento PDF aperto da salvare.');
         return false;

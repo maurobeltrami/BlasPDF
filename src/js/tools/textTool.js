@@ -5,6 +5,13 @@ import { findTextAtPosition } from './textDetector.js';
 import { createFormattingPopover, removeFormattingPopover, getFormatState, setFormatState } from './textFormatter.js';
 
 let activeInput = null;
+let currentCommitHandler = null;
+
+export function commitActiveText() {
+    if (activeInput && currentCommitHandler) {
+        currentCommitHandler();
+    }
+}
 
 export function initTextTool(overlayEl) {
     if (!overlayEl) return;
@@ -13,7 +20,7 @@ export function initTextTool(overlayEl) {
         if (State.activeTool !== 'text') return;
         if (e.target.closest('.text-formatter-popover') || e.target.classList.contains('smart-edit-input')) return;
         if (activeInput) {
-            activeInput.blur();
+            commitActiveText();
             return;
         }
 
@@ -99,6 +106,7 @@ export function initTextTool(overlayEl) {
             removeFormattingPopover();
             input.remove();
             activeInput = null;
+            currentCommitHandler = null;
         };
 
         const cancelText = () => {
@@ -108,7 +116,10 @@ export function initTextTool(overlayEl) {
             removeFormattingPopover();
             input.remove();
             activeInput = null;
+            currentCommitHandler = null;
         };
+
+        currentCommitHandler = commitText;
 
         // 4. Apertura popover di formattazione
         createFormattingPopover(input, overlayEl, commitText, cancelText, applyStyle);
@@ -116,6 +127,14 @@ export function initTextTool(overlayEl) {
         input.addEventListener('keydown', (ke) => {
             if (ke.key === 'Enter') { ke.preventDefault(); commitText(); }
             if (ke.key === 'Escape') { ke.preventDefault(); cancelText(); }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (activeInput === input && !document.activeElement?.closest('.text-formatter-popover')) {
+                    commitText();
+                }
+            }, 150);
         });
 
         input.focus();

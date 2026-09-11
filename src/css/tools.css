@@ -27,27 +27,41 @@
 }
 
 .whiteout-box {
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+    border: none;
+    outline: none;
+    box-shadow: none;
 }
 
 .whiteout-box.white { background-color: #ffffff; }
 .whiteout-box.black { background-color: #000000; }
 
+.tool-select-mode .whiteout-box:hover,
+.tool-select-mode .whiteout-box.active {
+    outline: 1px dashed var(--accent-blue);
+}
+
 .text-box {
     background: transparent;
-    border: 1px dashed transparent;
-    padding: 2px 4px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
     font-family: Helvetica, Arial, sans-serif;
     color: #000000;
     line-height: 1.2;
     white-space: pre-wrap;
-    min-width: 30px;
-    min-height: 20px;
 }
 
-.text-box:hover, .text-box:focus {
-    border-color: var(--accent-blue);
-    background: rgba(77, 148, 255, 0.08);
+.tool-select-mode .text-box:hover,
+.tool-select-mode .text-box.active {
+    outline: 1px dashed var(--accent-blue);
+}
+
+.text-box:focus,
+.text-box:focus-visible {
+    border: none;
+    outline: none;
+    box-shadow: none;
 }
 
 .signature-box img {
