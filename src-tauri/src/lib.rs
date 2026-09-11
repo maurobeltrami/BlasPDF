@@ -18,6 +18,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::pick_and_read_pdf,
             commands::pick_and_save_pdf,
+            commands::pick_and_read_image,
+            commands::pick_and_read_images,
+            commands::pick_and_save_any_file,
             commands::read_pdf_file,
             commands::save_pdf_file,
             commands::close_app,

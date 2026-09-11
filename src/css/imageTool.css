@@ -1,0 +1,65 @@
+/* imageTool.css - Stili per il riquadro immagine e maniglie angolari di ridimensionamento */
+.annotation-item.image-box {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    border: 1px dashed transparent;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.tool-select-mode .annotation-item.image-box:hover,
+.annotation-item.image-box.active {
+    border-color: #2563eb;
+    background-color: rgba(37, 99, 235, 0.04);
+}
+
+.annotation-item.image-box img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Maniglie di ridimensionamento ai quattro angoli */
+.annotation-item.image-box .resize-handle {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #ffffff;
+    border: 1.5px solid #2563eb;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    z-index: 12;
+    display: none;
+}
+
+.tool-select-mode .annotation-item.image-box:hover .resize-handle,
+.annotation-item.image-box.active .resize-handle {
+    display: block;
+}
+
+.annotation-item.image-box .resize-handle.nw {
+    top: -5px;
+    left: -5px;
+    cursor: nwse-resize;
+}
+
+.annotation-item.image-box .resize-handle.ne {
+    top: -5px;
+    right: -5px;
+    cursor: nesw-resize;
+}
+
+.annotation-item.image-box .resize-handle.sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: nesw-resize;
+}
+
+.annotation-item.image-box .resize-handle.se {
+    bottom: -5px;
+    right: -5px;
+    cursor: nwse-resize;
+}

@@ -1,6 +1,6 @@
-// annotationEngine.js - Gestione reattiva annotazioni, Undo/Redo e baking vettoriale
+// annotationEngine.js - Gestione reattiva annotazioni, Undo/Redo e overlay visuale
 import { State, setIsModified } from './stateManager.js';
-import { PDFDocument, rgb, StandardFonts } from '../../vendor/pdf-lib.esm.min.js';
+import { bakeAnnotations } from './annotationBake.js';
 
 const pageAnnotations = new Map();
 const undoStack = [];
@@ -53,12 +53,20 @@ export function renderOverlay() {
         el.className = `annotation-item ${a.type}-box ${a.color === '#000000' ? 'black' : 'white'}`;
         el.style.left = `${a.normX * 100}%`;
         el.style.top = `${a.normY * 100}%`;
-        if (a.type === 'whiteout' || a.type === 'signature') {
+        if (a.type === 'whiteout' || a.type === 'signature' || a.type === 'image') {
             el.style.width = `${a.normW * 100}%`;
             el.style.height = `${a.normH * 100}%`;
         }
-        if (a.type === 'signature' && a.dataUrl) {
-            el.innerHTML = `<img src="${a.dataUrl}" alt="Firma" />`;
+        if ((a.type === 'signature' || a.type === 'image') && a.dataUrl) {
+            el.innerHTML = `<img src="${a.dataUrl}" alt="${a.type}" draggable="false" />`;
+            if (a.type === 'image') {
+                el.innerHTML += `
+                    <div class="resize-handle nw" data-handle="nw"></div>
+                    <div class="resize-handle ne" data-handle="ne"></div>
+                    <div class="resize-handle sw" data-handle="sw"></div>
+                    <div class="resize-handle se" data-handle="se"></div>
+                `;
+            }
         } else if (a.type === 'text') {
             el.textContent = a.text;
             el.style.fontSize = `${(a.fontSize || 14) * (State.zoomScale || 1.0)}px`;
@@ -74,17 +82,40 @@ export function renderOverlay() {
 function attachItemDrag(el, ann, overlay) {
     el.addEventListener('mousedown', (e) => {
         if (State.activeTool !== 'select' || e.button !== 0) return;
+        const handle = e.target.getAttribute('data-handle');
         e.stopPropagation();
         const rect = overlay.getBoundingClientRect();
         const startX = e.clientX, startY = e.clientY;
         const origX = ann.normX, origY = ann.normY;
+        const origW = ann.normW, origH = ann.normH;
+        const ratio = ann.aspectRatio || (origW / origH);
 
         const onMove = (ev) => {
             if (!rect.width || !rect.height) return;
-            ann.normX = Math.max(0, Math.min(1 - (ann.normW || 0.05), origX + (ev.clientX - startX) / rect.width));
-            ann.normY = Math.max(0, Math.min(1 - (ann.normH || 0.05), origY + (ev.clientY - startY) / rect.height));
+            const dx = (ev.clientX - startX) / rect.width;
+            const dy = (ev.clientY - startY) / rect.height;
+
+            if (handle) {
+                // Ridimensionamento proporzionale mantenendo il rapporto d'aspetto
+                let newW = origW;
+                if (handle.includes('e')) newW = Math.max(0.04, Math.min(1 - origX, origW + dx));
+                if (handle.includes('w')) {
+                    const maxW = origX + origW;
+                    newW = Math.max(0.04, Math.min(maxW, origW - dx));
+                    ann.normX = origX + (origW - newW);
+                }
+                ann.normW = newW;
+                ann.normH = newW / ratio;
+                if (handle.includes('n')) ann.normY = origY + (origH - ann.normH);
+                el.style.width = `${ann.normW * 100}%`;
+                el.style.height = `${ann.normH * 100}%`;
+            } else {
+                ann.normX = Math.max(0, Math.min(1 - (ann.normW || 0.05), origX + dx));
+                ann.normY = Math.max(0, Math.min(1 - (ann.normH || 0.05), origY + dy));
+            }
             el.style.left = `${ann.normX * 100}%`;
             el.style.top = `${ann.normY * 100}%`;
+            setIsModified(true);
         };
         const onUp = () => {
             window.removeEventListener('mousemove', onMove);
@@ -95,52 +126,9 @@ function attachItemDrag(el, ann, overlay) {
     });
 }
 
-function parseColor(hex) {
-    if (!hex || hex === '#000000') return rgb(0, 0, 0);
-    if (hex === '#ffffff') return rgb(1, 1, 1);
-    if (hex.startsWith('#') && hex.length === 7) {
-        return rgb(parseInt(hex.slice(1, 3), 16) / 255, parseInt(hex.slice(3, 5), 16) / 255, parseInt(hex.slice(5, 7), 16) / 255);
-    }
-    return rgb(0, 0, 0);
-}
-
+/**
+ * Funzione ponte retrocompatibile per il salvataggio vettoriale
+ */
 export async function bakeAnnotationsToPdf(pdfBytes) {
-    if (pageAnnotations.size === 0) return pdfBytes;
-    const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-    const fonts = new Map();
-
-    const getFont = async (fam, bold) => {
-        const k = `${fam}_${bold}`;
-        if (fonts.has(k)) return fonts.get(k);
-        let fn = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-        if (fam === 'Times-Roman') fn = bold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman;
-        if (fam === 'Courier') fn = bold ? StandardFonts.CourierBold : StandardFonts.Courier;
-        const embedded = await doc.embedFont(fn);
-        fonts.set(k, embedded);
-        return embedded;
-    };
-
-    for (const [pageNum, items] of pageAnnotations.entries()) {
-        if (pageNum > doc.getPageCount()) continue;
-        const page = doc.getPage(pageNum - 1);
-        const pw = page.getWidth(), ph = page.getHeight();
-
-        for (const a of items) {
-            const x = a.normX * pw, width = (a.normW || 0.1) * pw, height = (a.normH || 0.05) * ph;
-            const y = ph - (a.normY * ph) - height;
-
-            if (a.type === 'whiteout') {
-                page.drawRectangle({ x, y, width, height, color: a.color === '#000000' ? rgb(0, 0, 0) : rgb(1, 1, 1) });
-            } else if (a.type === 'text') {
-                const f = await getFont(a.fontFamily, a.bold);
-                page.drawText(a.text, { x, y: ph - (a.normY * ph) - (a.fontSize || 14), size: a.fontSize || 14, font: f, color: parseColor(a.color) });
-            } else if (a.type === 'signature' && a.dataUrl) {
-                try {
-                    const img = await doc.embedPng(a.dataUrl);
-                    page.drawImage(img, { x, y, width, height });
-                } catch (_) {}
-            }
-        }
-    }
-    return await doc.save();
+    return await bakeAnnotations(pdfBytes, pageAnnotations);
 }

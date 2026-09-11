@@ -1,4 +1,4 @@
-// app.js - Coordinamento eventi, strumenti della barra e comandi desktop
+// app.js - Coordinamento eventi, strumenti della barra, Centro Conversioni e comandi desktop
 import { State, subscribe, setCurrentPage, adjustZoom } from './core/stateManager.js';
 import { renderPage } from './core/pdfRenderer.js';
 import { updateActiveThumbnail } from './ui/pageThumbnails.js';
@@ -8,15 +8,17 @@ import { rotateCurrentPage, deleteCurrentPage, extractCurrentPage, handleMergePd
 import { initToolManager, updateToolUi } from './tools/toolManager.js';
 import { renderOverlay } from './core/annotationEngine.js';
 import { initCloseHandler } from './events/closeHandler.js';
+import { initConverterManager } from './converter/converterManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const pdfCanvas = document.getElementById('pdfCanvas');
     const mergeInput = document.getElementById('mergeFileInput');
     const fileInput = document.getElementById('hiddenFileInput');
 
-    // 1. Inizializza gestore strumenti grafici e intercettazione chiusura
+    // 1. Inizializza gestori strumenti, conversioni e protezione chiusura
     initToolManager();
     initCloseHandler();
+    initConverterManager();
 
     // 2. Apertura e Salvataggio (Nativo Tauri + Fallback Web)
     document.getElementById('btnOpen')?.addEventListener('click', openPdfFile);
@@ -42,13 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnZoomOut')?.addEventListener('click', () => adjustZoom(-0.15));
     document.getElementById('btnZoomIn')?.addEventListener('click', () => adjustZoom(0.15));
 
-    // 5. Drag & Drop Universale (Nativo macOS Finder + WebKit HTML5)
+    // 5. Drag & Drop Universale
     ['dragenter', 'dragover'].forEach(evt => {
         window.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
     });
     window.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         const file = e.dataTransfer?.files?.[0];
         if (isPdfFile(file)) handleFileSelection(file);
     });
@@ -108,10 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (zoomInd) zoomInd.textContent = `${Math.round(state.zoomScale * 100)}%`;
         }
 
-        if (property === 'activeTool') {
-            updateToolUi(state.activeTool);
-        }
+        if (property === 'activeTool') updateToolUi(state.activeTool);
     });
 
-    console.log('BlasPDF: Interfaccia e controlli desktop operativi al 100%.');
+    console.log('BlasPDF: Interfaccia, strumenti e Centro Conversioni operativi al 100%.');
 });

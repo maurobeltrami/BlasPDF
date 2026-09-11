@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/toolbar.css">
     <link rel="stylesheet" href="css/tools.css">
     <link rel="stylesheet" href="css/textTool.css">
+    <link rel="stylesheet" href="css/imageTool.css">
+    <link rel="stylesheet" href="css/converter.css">
     <link rel="stylesheet" href="css/themes/modern.css">
 </head>
 <body class="theme-modern">
@@ -17,14 +19,18 @@
     <header class="main-toolbar">
         <div class="toolbar-group">
             <div class="brand-badge">Blas<span>PDF</span> <span class="badge-pill">Local-First</span></div>
+            <div class="view-switch-tabs">
+                <button id="tabEditor" class="tab-btn active">📄 Editor</button>
+                <button id="tabConverter" class="tab-btn">🔄 Conversioni</button>
+            </div>
             <div class="toolbar-separator"></div>
-            <button id="btnOpen" class="tool-btn primary" title="Apri file PDF (Cmd+O)">📂 Apri PDF</button>
-            <button id="btnSave" class="tool-btn" title="Esporta PDF modificato (Cmd+S)">💾 Salva Modifiche</button>
+            <button id="btnOpen" class="tool-btn primary" title="Apri PDF (Cmd+O)">📂 Apri</button>
+            <button id="btnSave" class="tool-btn" title="Salva modifiche (Cmd+S)">💾 Salva</button>
             <div class="toolbar-separator"></div>
-            <button id="btnRotatePage" class="tool-btn" title="Ruota pagina corrente di 90° (R)">⟳ Ruota</button>
-            <button id="btnMergePdf" class="tool-btn" title="Unisci un altro PDF in coda">➕ Unisci PDF</button>
-            <button id="btnExtractPage" class="tool-btn" title="Estrai pagina corrente come nuovo PDF">✂️ Estrai</button>
-            <button id="btnDeletePage" class="tool-btn" title="Elimina pagina corrente">🗑️ Elimina</button>
+            <button id="btnRotatePage" class="tool-btn" title="Ruota pagina (R)">⟳ Ruota</button>
+            <button id="btnMergePdf" class="tool-btn" title="Unisci un altro PDF">➕ Unisci</button>
+            <button id="btnExtractPage" class="tool-btn" title="Estrai pagina">✂️ Estrai</button>
+            <button id="btnDeletePage" class="tool-btn" title="Elimina pagina">🗑️ Elimina</button>
         </div>
 
         <div class="toolbar-group">
@@ -39,41 +45,34 @@
 
         <div class="toolbar-group">
             <button id="toolSelect" class="tool-btn active" title="Strumento Selezione">👆 Cursore</button>
-            <button id="toolWhiteout" class="tool-btn" title="Strumento Bianchetto (Copertura)">🖍️ Bianchetto</button>
+            <button id="toolWhiteout" class="tool-btn" title="Strumento Bianchetto">🖍️ Bianchetto</button>
             <button id="toolText" class="tool-btn" title="Aggiungi Testo">✍️ Testo</button>
             <button id="toolSign" class="tool-btn" title="Apponi Firma">✒️ Firma</button>
+            <button id="toolImage" class="tool-btn" title="Inserisci Immagine o Timbro">🖼️ Immagine</button>
             <div class="toolbar-separator"></div>
-            <button id="btnUndo" class="tool-btn" title="Annulla annotazione (Cmd+Z)">↩ Annulla</button>
-            <button id="btnRedo" class="tool-btn" title="Ripristina annotazione (Cmd+Shift+Z)">↪ Ripristina</button>
+            <button id="btnUndo" class="tool-btn" title="Annulla (Cmd+Z)">↩</button>
+            <button id="btnRedo" class="tool-btn" title="Ripristina (Cmd+Shift+Z)">↪</button>
         </div>
     </header>
 
-    <!-- AREA DI LAVORO A TRE PANNELLI -->
+    <!-- AREA DI LAVORO EDITOR DOCUMENTO -->
     <main class="app-container">
-        <!-- Pannello Miniature Pagine Sinistro -->
         <aside id="sidebarThumbnails" class="sidebar-thumbnails">
-            <div style="padding: 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                Pagine Documento
-            </div>
+            <div style="padding: 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Pagine</div>
             <div id="thumbnailsList" style="display: flex; flex-direction: column; gap: 12px; padding: 0 12px 24px 12px;"></div>
         </aside>
-
-        <!-- Viewport Centrale con Foglio e Canvas PDF -->
         <section id="mainViewport" class="main-viewport">
             <div id="emptyDropState" class="empty-state">
                 <div class="drop-zone-border" id="dropZoneTrigger">
                     <div style="font-size: 48px;">📄</div>
                     <h2>Trascina qui il tuo documento PDF</h2>
-                    <p style="font-size: 13px; max-width: 360px;">
-                        I tuoi file vengono aperti ed elaborati al 100% in locale sul tuo computer, senza connessione cloud o abbonamenti.
-                    </p>
+                    <p style="font-size: 13px; max-width: 360px;">Elaborazione al 100% in locale sul tuo computer, senza cloud né abbonamenti.</p>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button id="btnBrowseEmpty" class="tool-btn primary">Sfoglia Documenti</button>
                         <button id="btnLoadSample" class="tool-btn" style="border-color: var(--border-light);">📄 Prova Esempio</button>
                     </div>
                 </div>
             </div>
-            
             <div id="pdfCanvasWrapper" class="pdf-canvas-container" style="display: none; position: relative;">
                 <canvas id="pdfCanvas"></canvas>
                 <div id="annotationOverlay" class="annotation-overlay"></div>
@@ -81,32 +80,29 @@
         </section>
     </main>
 
-    <!-- Modale Apposizione Firma Grafica -->
+    <!-- CENTRO CONVERSIONI LOCALE (MULTI-VIEW) -->
+    <section id="converterContainer" class="converter-container" style="display: none;"></section>
+
+    <!-- Modale Firma Grafica -->
     <div id="signatureModal" class="modal-backdrop" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-header">
-                <span>✒️ Apponi la tua Firma Grafica</span>
+                <span>✒️ Apponi Firma Grafica</span>
                 <button id="btnCloseSigModal" class="tool-btn" style="padding: 2px 8px;">✕</button>
             </div>
-            <div class="signature-pad-container">
-                <canvas id="signaturePad" class="signature-canvas"></canvas>
-            </div>
+            <div class="signature-pad-container"><canvas id="signaturePad" class="signature-canvas"></canvas></div>
             <div class="modal-footer">
-                <button id="btnClearSig" class="tool-btn">Pulisci Tratto</button>
-                <button id="btnApplySig" class="tool-btn primary">Inserisci sul Foglio</button>
+                <button id="btnClearSig" class="tool-btn">Pulisci</button>
+                <button id="btnApplySig" class="tool-btn primary">Inserisci</button>
             </div>
         </div>
     </div>
 
-    <!-- Modale Conferma Chiusura con Modifiche non Salvate -->
+    <!-- Modale Conferma Chiusura -->
     <div id="unsavedModal" class="modal-backdrop" style="display: none;">
         <div class="modal-dialog" style="max-width: 440px;">
-            <div class="modal-header">
-                <span style="display: flex; align-items: center; gap: 8px;">⚠️ Modifiche non salvate</span>
-            </div>
-            <div style="padding: 18px; font-size: 13px; line-height: 1.5; color: var(--text-secondary);">
-                Il documento contiene modifiche non salvate. Vuoi salvare il lavoro prima di uscire da BlasPDF?
-            </div>
+            <div class="modal-header"><span>⚠️ Modifiche non salvate</span></div>
+            <div style="padding: 18px; font-size: 13px; line-height: 1.5; color: var(--text-secondary);">Vuoi salvare il documento prima di uscire?</div>
             <div class="modal-footer" style="gap: 8px;">
                 <button id="btnUnsavedCancel" class="tool-btn">Annulla</button>
                 <button id="btnUnsavedDiscard" class="tool-btn" style="color: var(--accent-red); border-color: rgba(230,57,70,0.4);">Non Salvare</button>
@@ -115,9 +111,10 @@
         </div>
     </div>
 
-    <!-- Input file nascosti per apertura e unione documenti (compatibilità WebKit) -->
-    <input type="file" id="hiddenFileInput" accept="application/pdf" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
-    <input type="file" id="mergeFileInput" accept="application/pdf" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
+    <!-- Input file nascosti -->
+    <input type="file" id="hiddenFileInput" accept="application/pdf" style="display: none;">
+    <input type="file" id="mergeFileInput" accept="application/pdf" style="display: none;">
+    <input type="file" id="hiddenImageInput" accept="image/*" style="display: none;">
 
     <script type="module" src="js/app.js"></script>
 </body>

@@ -16,7 +16,8 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 * **Gestione Nativa del Ciclo di Vita Finestra:**
   * Intercettazione a basso livello dell'evento `WindowEvent::CloseRequested` nel backend Rust con `api.prevent_close()`.
   * Dialogo bidirezionale via eventi IPC (`request_close_window` e `close_app`) per salvaguardare modifiche non salvate prima della chiusura.
-* **Plugin Utilizzati:**
+* **Plugin e Crate Native:**
+  * `rfd`: Dialoghi nativi per selezione e salvataggio file singoli e batch (`pick_file`, `pick_files`, `save_file`).
   * `tauri-plugin-dialog`: Finestre di dialogo native di apertura/salvataggio file.
   * `tauri-plugin-fs`: Accesso al file system protetto e controllato da permessi.
 
@@ -29,13 +30,17 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 * **Architettura:** Funzionamento disaccoppiato tramite Web Worker dedicato (`pdf.worker.min.mjs`), che garantisce il rendering continuo a 60 FPS senza bloccare i thread dell'interfaccia.
 * **Estrazione Baseline Testuale (Text Layer):** Parsing dell'albero dei token tramite `page.getTextContent()`. Calcolo geometrico della linea di base del font e della matrice affine di trasformazione:
   $$\text{topDomY} = (ph - ty) - (\text{fontSize} \times 0.85)$$
+* **Rendering Hi-Res per Conversione Immagini:** Supporto a moltiplicatori DPI personalizzati (150 e 300 DPI) per l'esportazione tipografica di pagine in PNG o JPEG.
 * **Integrazione Local-First:** Incluso direttamente nella directory `src/vendor/` per consentire il funzionamento al 100% offline, senza dipendenze da server o CDN esterni.
 
 ### 🟢 PDF-Lib (v1.17)
 * **Ruolo:** Motore di manipolazione vettoriale e mutazione dell'albero COS delle pagine.
-* **Funzionalità:** Unione di più PDF, divisione in fogli separati, estrazione, rotazione e inserimento permanente di rettangoli (bianchetto/redazione), testi vettoriali e firme grafiche.
-* **Font Vettoriali Standard ISO Type 1:** Utilizzo di `StandardFonts` (`Helvetica`, `TimesRoman`, `Courier` e varianti Bold). Garantisce testo vettoriale ultra-definito senza appesantire le dimensioni del file con incorporamento di interi set TrueType/WOFF.
-* **Firma Grafica HiDPI:** Disegno a mano libera vettorizzato con compensazione della densità di pixel dello schermo (`devicePixelRatio`) ed esportazione in stream PNG trasparente incorporato via `embedPng`.
+* **Funzionalità:** Unione di più PDF, divisione in fogli separati, estrazione, rotazione e inserimento permanente di rettangoli (bianchetto/redazione), testi vettoriali, firme grafiche e immagini/timbri (`embedPng`, `embedJpg`).
+* **Font Vettoriali Standard ISO Type 1:** Utilizzo di `StandardFonts` (`Helvetica`, `TimesRoman`, `Courier` e varianti Bold).
+* **Ottimizzazione Stream COS:** Ricompressione e pulizia oggetti orfani abilitando `useObjectStreams: true`.
+
+### 🖼️ Transcodifica Grafica in Memoria (OffscreenCanvas)
+* **Ruolo:** Normalizzazione automatica dei formati WebP, SVG, BMP e GIF in bitmap compatibili con PDF-Lib senza dipendenze esterne.
 
 ---
 
@@ -44,23 +49,17 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 ### 🌐 Vanilla JavaScript (ES2022 Modules)
 * **Ruolo:** Logica applicativa dell'interfaccia utente.
 * **Pattern Adottati:**
-  * *Single Responsibility Principle (SRP):* Ogni modulo ha un unico compito specifico.
-  * *Observer Pattern (State Manager):* Gestione reattiva centralizzata dello stato applicativo (`State`), con notifiche automatiche ai componenti registrati.
-  * *Zero Frameworks:* Nessun framework monolitico (React, Vue, Angular). Il codice sorgente rimane snello, direttamente ispezionabile e privo di layer di astrazione superflui.
+  * *Single Responsibility Principle (SRP):* Ogni modulo ha un unico compito specifico e non supera mai le 150 righe di codice.
+  * *Observer Pattern (State Manager):* Gestione reattiva centralizzata dello stato applicativo (`State`).
+  * *Zero Frameworks:* Nessun framework monolitico (React, Vue, Angular), massima velocità e totale trasparenza didattica.
 
 ### 🖌️ CSS3 Modulare & Custom Properties
 * **Ruolo:** Stile grafico e Design System Dark Modern in stile BlasOpen.
-* **Organizzazione:** Suddivisione per responsabilità (`variables.css`, `layout.css`, `toolbar.css`, `themes/modern.css`).
+* **Organizzazione:** Suddivisione per responsabilità (`variables.css`, `layout.css`, `toolbar.css`, `imageTool.css`, `converter.css`, `themes/modern.css`).
 
 ---
 
-## 🤖 4. Motore di Intelligenza Artificiale (Dual-Mode)
+## 🤖 4. Motore di Intelligenza Artificiale (Pianificato per v2.0.0)
 
-### 🦙 Ollama (Modalità Locale di Default)
-* **Ruolo:** Inferenza locale on-device per l'Agente AI.
-* **Protocollo:** Connessione HTTP REST all'endpoint locale `http://localhost:11434/v1` compatibile con le API standard.
-* **Etica e Privacy:** Nessun byte di testo o dato del documento lascia il computer dell'utente. Massima sovranità e conformità GDPR per documenti confidenziali.
-
-### ☁️ Provider Cloud (Modalità Opzionale con Avviso)
-* **Ruolo:** Supporto per utenti sprovvisti di GPU locale per eseguire modelli on-device.
-* **Sicurezza:** Schermata di avviso visivo obbligatorio e conferma esplicita prima di inviare qualsiasi porzione di testo a server esterni.
+### 🦙 Ollama (Modalità Locale on-device)
+* **Ruolo:** Inferenza locale on-device per l'Agente AI senza trasmissione cloud.

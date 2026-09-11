@@ -1,22 +1,25 @@
-// toolManager.js - Coordinamento strumenti di correzione (Bianchetto, Testo, Firma) e Undo/Redo
+// toolManager.js - Coordinamento strumenti di correzione (Bianchetto, Testo, Firma, Immagine) e Undo/Redo
 import { State, setActiveTool } from '../core/stateManager.js';
-import { undo, redo, renderOverlay } from '../core/annotationEngine.js';
+import { undo, redo } from '../core/annotationEngine.js';
 import { initWhiteoutTool } from './whiteoutTool.js';
 import { initTextTool } from './textTool.js';
 import { initSignatureTool, openSignatureDialog } from './signatureTool.js';
+import { initImageTool, openImageDialog } from './imageTool.js';
 
 export function initToolManager() {
     const overlay = document.getElementById('annotationOverlay');
     initWhiteoutTool(overlay);
     initTextTool(overlay);
     initSignatureTool();
+    initImageTool();
 
     // 1. Strumenti barra superiore
     const tools = {
         select: document.getElementById('toolSelect'),
         whiteout: document.getElementById('toolWhiteout'),
         text: document.getElementById('toolText'),
-        sign: document.getElementById('toolSign')
+        sign: document.getElementById('toolSign'),
+        image: document.getElementById('toolImage')
     };
 
     Object.entries(tools).forEach(([name, btn]) => {
@@ -24,6 +27,7 @@ export function initToolManager() {
         btn.addEventListener('click', () => {
             setActiveTool(name);
             if (name === 'sign') openSignatureDialog();
+            if (name === 'image') openImageDialog();
         });
     });
 
@@ -46,7 +50,7 @@ export function initToolManager() {
 }
 
 export function updateToolUi(activeTool) {
-    const tools = ['select', 'whiteout', 'text', 'sign'];
+    const tools = ['select', 'whiteout', 'text', 'sign', 'image'];
     tools.forEach(name => {
         const id = 'tool' + name.charAt(0).toUpperCase() + name.slice(1);
         document.getElementById(id)?.classList.toggle('active', name === activeTool);
@@ -54,7 +58,11 @@ export function updateToolUi(activeTool) {
 
     const overlay = document.getElementById('annotationOverlay');
     if (overlay) {
-        overlay.style.cursor = activeTool === 'whiteout' ? 'crosshair' : (activeTool === 'text' ? 'text' : (activeTool === 'sign' ? 'pointer' : 'default'));
+        let cursor = 'default';
+        if (activeTool === 'whiteout') cursor = 'crosshair';
+        else if (activeTool === 'text') cursor = 'text';
+        else if (activeTool === 'sign' || activeTool === 'image') cursor = 'pointer';
+        overlay.style.cursor = cursor;
         overlay.classList.toggle('tool-select-mode', activeTool === 'select');
     }
 }
