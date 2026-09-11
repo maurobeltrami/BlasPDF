@@ -103,12 +103,36 @@ BlasPDF integra una suite completa per correggere e annotare i documenti:
 
 ---
 
-## 🔒 8. Privacy e Sovranità dei Dati
+## 🖼️ 8. Inserimento di Immagini e Timbri (Novità v1.1.0)
 
-Tutti i documenti caricati in BlasPDF risiedono **esclusivamente nella memoria locale del tuo computer**. Nessun file viene inviato a server cloud, garantendo la totale conformità con la normativa sulla privacy e la massima protezione del segreto professionale.
+Puoi inserire timbri, loghi o immagini grafiche direttamente sopra le pagine del documento:
+* **Formati Accettati:** PNG (anche con trasparenza alpha), JPG/JPEG, WebP, SVG, BMP e GIF.
+* **Come Inserire:** Clicca sul pulsante **`🖼️ Immagine`** nella barra superiore e seleziona il file desiderato.
+* **Spostamento e Ridimensionamento:**
+  * Seleziona lo strumento **`👆 Cursore`** per posizionare l'immagine con precisione millimetrica sul foglio.
+  * Usa le 4 **maniglie d'angolo** per ridimensionare l'immagine preservando rigorosamente le proporzioni originali (*aspect-ratio lock*).
+* **Eliminazione Rapida:** Clicca sul pulsante rosso **`✕`** posizionato in alto a destra sull'immagine (oppure selezionala e premi `Canc` / `Backspace` sulla tastiera).
+* **Baking Vettoriale:** Al momento del salvataggio con `💾 Salva`, l'immagine viene incorporata nativamente nella struttura interna del PDF come oggetto `/XObject`.
 
 ---
 
-## 🗺️ 9. Prossime Novità (Roadmap v1.1.0 & v2.0.0)
+## 🔄 9. Centro Conversioni Offline (Stile iLovePDF Locale - Novità v1.1.0)
 
-Per consultare le specifiche architetturali delle future funzionalità in arrivo (inserimento immagini multi-formato, centro conversioni stile *iLovePDF* offline e assistente locale AI con Ollama), consulta il documento [Specifiche Tecniche Prossime Implementazioni](../prossime_implementazioni.md).
+Nella barra superiore, fai clic sulla scheda **`[ 🔄 Conversioni ]`** per accedere alla dashboard batch degli strumenti di trasformazione documenti:
+* **🖼️ Immagini ➔ PDF:** Raggruppa e trasforma un pacchetto di immagini in un unico documento PDF multi-pagina con orientamento automatico.
+* **📸 PDF ➔ Immagini (Hi-Res Retina):** Esporta le pagine del documento in immagini PNG ad alta definizione tipografica (150 DPI per uso digitale o 300 DPI per stampa).
+* **📝 PDF ➔ Testo (.txt / .md):** Estrae tutto il testo strutturato con separatori di pagina per consentire copie rapide, archiviazione o elaborazioni testuali offline.
+* **🗜️ Ottimizza PDF:** Analizza il documento ed elimina elementi orfani abilitando la compressione degli stream di oggetti COS (*Object Streams*), con visualizzazione immediata della percentuale di spazio risparmiato.
+*(Per la guida approfondita, consulta [Guida Centro Conversioni e Immagini](guida_centro_conversioni_e_immagini.md)).*
+
+---
+
+## 🔒 10. Privacy e Sovranità dei Dati
+
+Tutti i documenti caricati in BlasPDF risiedono **esclusivamente nella memoria locale del tuo computer**. Nessun file o metadato viene inviato a server cloud, garantendo la totale conformità con la normativa sulla privacy e la massima protezione del segreto professionale.
+
+---
+
+## 🗺️ 11. Prossime Novità (Roadmap v2.0.0)
+
+La prossima grande release di BlasPDF introdurrà l'**Assistente AI Locale** integrato con Ollama on-device per l'analisi intelligente, il riassunto e la chat contestuale sui documenti. Per tutti i dettagli architetturali, consulta [docs/05_agenti_ai_local_first.md](../05_agenti_ai_local_first.md) e [Specifiche Tecniche Prossime Implementazioni](../prossime_implementazioni.md).

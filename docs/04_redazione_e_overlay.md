@@ -99,3 +99,22 @@ A differenza dei software complessi che alterano direttamente i flussi binari co
    $$\text{topDomY} = (ph - ty) - (\text{fontSize} \times 0.85)$$
 3. **Copertura Chirurgica & Sovrascrittura:** Posiziona atomica di un'annotazione di bianchetto per celare il vecchio glifo e apertura immediata di un campo di digitazione precompilato.
 4. **Menu Formattazione Adattivo (`textFormatter.js`):** Un popover fluttuante gestisce font, colore e dimensioni, calcolando dinamicamente la propria posizione sopra o sotto il campo per non essere mai tagliato dai bordi del foglio.
+
+---
+
+## 🖼️ 6. Inserimento Immagini, Timbri e Baking Vettoriale Permanente
+
+Nel modulo `src/js/tools/imageTool.js`, BlasPDF implementa l'inserimento di elementi grafici esterni (PNG, JPG, WebP, SVG, BMP, GIF):
+
+1. **Transcodifica in Memoria (`OffscreenCanvas`):** Formati grafici non supportati in modo diretto dai parser nativi PDF (come WebP e SVG) vengono rasterizzati su un canvas virtuale e convertiti in Data URL PNG a 32-bit prima dell'incorporamento.
+2. **Aspect-Ratio Lock & Maniglie Angolari:** Le quattro maniglie angolari (`nw`, `ne`, `sw`, `se`) calcolano le variazioni delta sulle coordinate normalizzate garantendo che il rapporto $\text{normW} / \text{normH}$ rimanga rigidamente vincolato alle proporzioni native dell'immagine.
+3. **Embedding Nativo `/XObject` (`annotationBake.js`):** Al momento del salvataggio, l'immagine viene inserita con `doc.embedPng` o `doc.embedJpg` e disegnata sul canvas interno della pagina (`page.drawImage`) con coordinate cartesiane corrette.
+
+---
+
+## ✨ 7. Resa Seamless e Assenza di Riquadri Artificiali
+
+Nei visualizzatori PDF professionali, il bianchetto deve fondersi in modo indistinguibile con il foglio bianco, e il testo vettoriale inserito deve apparire come parte integrante del documento originale:
+1. **Eliminazione dei Falsi Contorni:** Le proprietà `box-shadow` e `border` sui nodi `.whiteout-box` e `.text-box` sono impostate su `none`, eliminando qualsiasi cornice grigia visibile a schermo o in stampa.
+2. **Feedback Solo in Modalità Selezione:** I bordi tratteggiati blu di selezione appaiono unicamente quando è attivo lo strumento `👆 Cursore` (`.tool-select-mode`), consentendo lo spostamento o la cancellazione senza sporcare la visualizzazione normale.
+3. **Commit Intelligente dell'Input:** L'input testuale viene consolidato automaticamente quando perde il focus o quando si cambia strumento, garantendo che nessun campo input orfano rimanga visibile a schermo.
