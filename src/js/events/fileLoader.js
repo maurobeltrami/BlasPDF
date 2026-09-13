@@ -74,8 +74,8 @@ export async function handleFileSelection(file) {
  */
 export async function processPdfBuffer(pdfBytes, fileName, filePath = null) {
     // Clona il buffer originale per impedire che PDF.js lo azzeri durante il trasferimento al Worker
-    const safeBytes = new Uint8Array(pdfBytes);
-    const workerCopy = new Uint8Array(safeBytes);
+    const safeBytes = new Uint8Array(pdfBytes.slice(0));
+    const workerCopy = new Uint8Array(pdfBytes.slice(0));
 
     const pdfDoc = await loadPdf(workerCopy);
     const totalPages = pdfDoc.numPages;
