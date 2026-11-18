@@ -1,17 +1,31 @@
-/* imageTool.css - Stili per il riquadro immagine, maniglie di resize e pulsante elimina CRUD */
+/* imageTool.css - Stili per il riquadro immagine, maniglie di resize e barra comandi contestuale */
+/*
+ * TEORIA DIDATTICA: Gestione degli stati dell'overlay immagine.
+ * 1. Stato Confermato (Deselezionato / Inattivo): l'immagine è perfettamente integrata
+ *    nel documento senza bordi o controlli visibili, preservando l'anteprima fedele del PDF.
+ * 2. Stato di Modifica (Attivo): evidenziato con bordo tratteggiato, 4 maniglie d'angolo
+ *    per il ridimensionamento geometrico proporzionale e toolbar fluttuante con azioni avanzate.
+ */
+
 .annotation-item.image-box {
     position: absolute;
-    cursor: move;
+    cursor: default;
     user-select: none;
     border: 1px dashed transparent;
     transition: border-color 0.15s ease;
     box-sizing: border-box;
 }
 
-.tool-select-mode .annotation-item.image-box:hover,
+/* In modalità selezione, l'immagine non attiva mostra il cursore pointer per invitare al clic di riapertura */
+.tool-select-mode .annotation-item.image-box {
+    cursor: pointer;
+}
+
+/* Stato attivo di modifica: mostra il bordo blu di selezione ed imposta il cursore di spostamento */
 .annotation-item.image-box.active {
     border-color: #2563eb;
     background-color: rgba(37, 99, 235, 0.04);
+    cursor: move;
 }
 
 .annotation-item.image-box img {
@@ -20,9 +34,10 @@
     display: block;
     pointer-events: none;
     user-select: none;
+    object-fit: fill;
 }
 
-/* Maniglie di ridimensionamento ai quattro angoli */
+/* Maniglie di ridimensionamento ai quattro angoli: VISIBILI SOLO SE L'IMMAGINE È ATTIVA */
 .annotation-item.image-box .resize-handle {
     position: absolute;
     width: 9px;
@@ -35,7 +50,6 @@
     display: none;
 }
 
-.tool-select-mode .annotation-item.image-box:hover .resize-handle,
 .annotation-item.image-box.active .resize-handle {
     display: block;
 }
@@ -45,37 +59,63 @@
 .annotation-item.image-box .resize-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
 .annotation-item.image-box .resize-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
 
-/* Pulsante rosso elimina immagine (CRUD) centrato in alto: NESSUNA sovrapposizione con le maniglie */
-.annotation-item.image-box .ann-del-btn {
+/* Barra contestuale fluttuante per immagini (Allineamento, Trasformazioni e CRUD) */
+.annotation-item.image-box .image-toolbar-floating {
     position: absolute;
-    top: -26px;
+    top: -42px;
     left: 50%;
     transform: translateX(-50%);
-    width: 22px;
-    height: 22px;
-    background: #ef4444;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
     display: none;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
-    z-index: 25;
-    padding: 0;
-    transition: transform 0.15s ease, background-color 0.15s ease;
+    gap: 3px;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 7px;
+    padding: 3px 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    z-index: 30;
+    user-select: none;
+    white-space: nowrap;
 }
 
-.annotation-item.image-box .ann-del-btn:hover {
-    background: #dc2626;
-    transform: translateX(-50%) scale(1.15);
-}
-
-.tool-select-mode .annotation-item.image-box:hover .ann-del-btn,
-.annotation-item.image-box.active .ann-del-btn {
+.annotation-item.image-box.active .image-toolbar-floating {
     display: flex;
+}
+
+.image-toolbar-floating .img-tb-btn {
+    background: transparent;
+    border: none;
+    color: #f8fafc;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 4px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.image-toolbar-floating .img-tb-btn:hover {
+    background: rgba(255, 255, 255, 0.20);
+    transform: scale(1.12);
+}
+
+.image-toolbar-floating .img-tb-btn.btn-del {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.image-toolbar-floating .img-tb-btn.btn-del:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.image-toolbar-floating .img-tb-sep {
+    width: 1px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.22);
+    margin: 0 2px;
 }

@@ -1,7 +1,7 @@
 // pdfRenderer.js - Motore di rendering PDF HiDPI ad alte prestazioni con PDF.js
 import * as pdfjsLib from '../../vendor/pdf.min.mjs';
+import { getPageAnnotations } from './annotationEngine.js';
 
-// Configura il worker locale isolato con URL assoluto garantito
 try {
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('../../vendor/pdf.worker.min.mjs', import.meta.url).href;
 } catch (_) {
@@ -12,46 +12,24 @@ let currentPdfDoc = null;
 let activeMainRender = null;
 const thumbTasks = new Map();
 
-/**
- * Carica un documento PDF da un buffer binario (ArrayBuffer / Uint8Array)
- */
 export async function loadPdf(dataBuffer) {
     if (activeMainRender) {
-        try {
-            activeMainRender.cancel();
-            await activeMainRender.promise.catch(() => {});
-        } catch (_) {}
+        try { activeMainRender.cancel(); await activeMainRender.promise.catch(() => {}); } catch (_) {}
         activeMainRender = null;
     }
-    thumbTasks.forEach(task => {
-        try { task.cancel(); } catch (_) {}
-    });
+    thumbTasks.forEach(task => { try { task.cancel(); } catch (_) {} });
     thumbTasks.clear();
-
-    // Clona il buffer prima del passaggio al worker per proteggere l'originale
-    const workerBuffer = dataBuffer.slice(0);
-    const loadingTask = pdfjsLib.getDocument({ data: workerBuffer });
+    const loadingTask = pdfjsLib.getDocument({ data: dataBuffer.slice(0) });
     currentPdfDoc = await loadingTask.promise;
     return currentPdfDoc;
 }
 
-/**
- * Restituisce il documento attualmente caricato
- */
-export function getCurrentDoc() {
-    return currentPdfDoc;
-}
+export function getCurrentDoc() { return currentPdfDoc; }
 
-/**
- * Effettua il rendering della pagina sul Canvas principale HiDPI
- */
 export async function renderPage(pageNum, canvas, userScale = 1.0) {
     if (!currentPdfDoc || !canvas) return null;
     if (activeMainRender) {
-        try {
-            activeMainRender.cancel();
-            await activeMainRender.promise.catch(() => {});
-        } catch (_) {}
+        try { activeMainRender.cancel(); await activeMainRender.promise.catch(() => {}); } catch (_) {}
         activeMainRender = null;
     }
 
@@ -59,42 +37,31 @@ export async function renderPage(pageNum, canvas, userScale = 1.0) {
         const page = await currentPdfDoc.getPage(pageNum);
         const pixelRatio = window.devicePixelRatio || 1;
         const viewport = page.getViewport({ scale: userScale });
-
         const context = canvas.getContext('2d');
         canvas.width = Math.floor(viewport.width * pixelRatio);
         canvas.height = Math.floor(viewport.height * pixelRatio);
         canvas.style.width = `${Math.floor(viewport.width)}px`;
         canvas.style.height = `${Math.floor(viewport.height)}px`;
-
         context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
-        const renderTask = page.render({
-            canvasContext: context,
-            viewport: viewport
-        });
+        const renderTask = page.render({ canvasContext: context, viewport });
         activeMainRender = renderTask;
         await renderTask.promise;
         activeMainRender = null;
         return viewport;
     } catch (err) {
-        if (err?.name !== 'RenderingCancelledException') {
-            console.error('Errore rendering pagina PDF:', err);
-        }
+        if (err?.name !== 'RenderingCancelledException') console.error('Errore rendering PDF:', err);
         return null;
     }
 }
 
 /**
- * Renderizza una miniatura isolata cancellando compiti precedenti sullo stesso canvas
+ * Renderizza una miniatura isolata disegnando la pagina e le relative annotazioni (immagini, firme, bianchetti)
  */
 export async function renderThumbnail(pageNum, canvas, targetWidth = 150) {
     if (!currentPdfDoc || !canvas) return;
     if (thumbTasks.has(canvas)) {
-        try {
-            const old = thumbTasks.get(canvas);
-            old.cancel();
-            await old.promise.catch(() => {});
-        } catch (_) {}
+        try { const old = thumbTasks.get(canvas); old.cancel(); await old.promise.catch(() => {}); } catch (_) {}
         thumbTasks.delete(canvas);
     }
 
@@ -103,7 +70,6 @@ export async function renderThumbnail(pageNum, canvas, targetWidth = 150) {
         const unscaledViewport = page.getViewport({ scale: 1.0 });
         const scale = targetWidth / unscaledViewport.width;
         const viewport = page.getViewport({ scale });
-
         const ctx = canvas.getContext('2d');
         canvas.width = Math.floor(viewport.width);
         canvas.height = Math.floor(viewport.height);
@@ -111,16 +77,32 @@ export async function renderThumbnail(pageNum, canvas, targetWidth = 150) {
         const task = page.render({ canvasContext: ctx, viewport });
         thumbTasks.set(canvas, task);
         await task.promise;
-    } catch (err) {
-        // Ignora compiti annullati volontariamente
+
+        // Disegna le annotazioni sulla miniatura per aggiornare l'anteprima visiva della barra laterale
+        const items = getPageAnnotations(pageNum);
+        for (const a of items) {
+            const ax = a.normX * canvas.width, ay = a.normY * canvas.height;
+            const aw = (a.normW || 0.1) * canvas.width, ah = (a.normH || 0.05) * canvas.height;
+            if (a.type === 'whiteout') {
+                ctx.fillStyle = a.color || '#ffffff';
+                ctx.fillRect(ax, ay, aw, ah);
+            } else if ((a.type === 'image' || a.type === 'signature') && a.dataUrl) {
+                const img = new Image();
+                img.src = a.dataUrl;
+                if (!img.complete) await new Promise(r => { img.onload = r; img.onerror = r; });
+                try { ctx.drawImage(img, ax, ay, aw, ah); } catch (_) {}
+            } else if (a.type === 'text') {
+                ctx.fillStyle = a.color || '#000000';
+                ctx.font = `${Math.max(3, (a.fontSize || 14) * scale)}px sans-serif`;
+                ctx.fillText(a.text, ax, ay + (a.fontSize || 14) * scale);
+            }
+        }
+    } catch (_) {
     } finally {
         thumbTasks.delete(canvas);
     }
 }
 
-/**
- * Estrae il testo grezzo da una pagina (fondamenta per l'Agente AI)
- */
 export async function extractPageText(pageNum) {
     if (!currentPdfDoc) return '';
     const page = await currentPdfDoc.getPage(pageNum);

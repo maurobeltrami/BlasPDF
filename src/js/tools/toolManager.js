@@ -1,6 +1,6 @@
 // toolManager.js - Coordinamento strumenti di correzione (Bianchetto, Testo, Firma, Immagine) e Undo/Redo
 import { State, setActiveTool } from '../core/stateManager.js';
-import { undo, redo } from '../core/annotationEngine.js';
+import { undo, redo, clearSelection } from '../core/annotationEngine.js';
 import { initWhiteoutTool } from './whiteoutTool.js';
 import { initTextTool, commitActiveText } from './textTool.js';
 import { initSignatureTool, openSignatureDialog } from './signatureTool.js';
@@ -26,6 +26,7 @@ export function initToolManager() {
         if (!btn) return;
         btn.addEventListener('click', () => {
             commitActiveText();
+            if (name !== 'select') clearSelection();
             setActiveTool(name);
             if (name === 'sign') openSignatureDialog();
             if (name === 'image') openImageDialog();

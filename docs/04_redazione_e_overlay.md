@@ -107,8 +107,15 @@ A differenza dei software complessi che alterano direttamente i flussi binari co
 Nel modulo `src/js/tools/imageTool.js`, BlasPDF implementa l'inserimento di elementi grafici esterni (PNG, JPG, WebP, SVG, BMP, GIF):
 
 1. **Transcodifica in Memoria (`OffscreenCanvas`):** Formati grafici non supportati in modo diretto dai parser nativi PDF (come WebP e SVG) vengono rasterizzati su un canvas virtuale e convertiti in Data URL PNG a 32-bit prima dell'incorporamento.
-2. **Aspect-Ratio Lock & Maniglie Angolari:** Le quattro maniglie angolari (`nw`, `ne`, `sw`, `se`) calcolano le variazioni delta sulle coordinate normalizzate garantendo che il rapporto $\text{normW} / \text{normH}$ rimanga rigidamente vincolato alle proporzioni native dell'immagine.
-3. **Embedding Nativo `/XObject` (`annotationBake.js`):** Al momento del salvataggio, l'immagine viene inserita con `doc.embedPng` o `doc.embedJpg` e disegnata sul canvas interno della pagina (`page.drawImage`) con coordinate cartesiane corrette.
+2. **Compensazione Aspect-Ratio Cartesiana & Lock Geometrico:**
+   - Le coordinate $\text{normW}$ e $\text{normH}$ sono frazioni relative $[0..1]$ del viewport. Poiché una pagina PDF reale (es. A4: $595 \times 842$ pt) non è quadrata, l'altezza normalizzata compensa il rapporto di forma del foglio:
+     $$\text{normH} = \frac{\text{normW} \cdot \text{pageAspect}}{\text{imgAspect}}, \quad \text{dove } \text{pageAspect} = \frac{W_{\text{foglio}}}{H_{\text{foglio}}}, \; \text{imgAspect} = \frac{W_{\text{img}}}{H_{\text{img}}}$$
+   - Durante il ridimensionamento con le 4 maniglie angolari (`nw`, `ne`, `sw`, `se`), il rapporto $\text{normHtoW} = \text{origH} / \text{origW}$ mantiene rigidamente bloccate le proporzioni native su qualsiasi livello di zoom e dimensione del foglio, eliminando ogni possibile distorsione.
+3. **Ciclo di Vita Conferma, Barra Contestuale & Riapertura Modifica (`imageToolbar.js`):**
+   - **Barra Comandi Fluttuante:** Quando l'immagine è attiva, `imageToolbar.js` espone azioni rapide di allineamento (centratura orizzontale, verticale, foglio), adattamento larghezza, reset scala, rotazione/specchiatura su Canvas, duplicazione ed eliminazione.
+   - **Conferma (Deselezione):** Cliccando in qualsiasi punto fuori dall'immagine, le maniglie di ridimensionamento e la barra contestuale scompaiono. L'immagine appare pulita, confermata e perfettamente inglobata nell'anteprima del documento.
+   - **Riapertura Modifica:** Cliccando nuovamente sopra l'immagine con lo strumento Cursore attivo, la sessione di modifica si riapre istantaneamente, ripristinando le 4 maniglie e la barra contestuale.
+4. **Embedding Nativo `/XObject` (`annotationBake.js`):** Al momento del salvataggio, l'immagine viene inserita con `doc.embedPng` o `doc.embedJpg` e disegnata sul canvas interno della pagina (`page.drawImage`) con coordinate cartesiane corrette.
 
 ---
 

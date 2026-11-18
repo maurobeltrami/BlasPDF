@@ -57,7 +57,8 @@ async function handleImageFile(file) {
 }
 
 /**
- * Normalizza l'immagine su Canvas (per SVG/WebP/BMP) e la posiziona al centro della pagina
+ * Normalizza l'immagine su Canvas (per formati non standard) e la posiziona
+ * al centro della pagina preservando rigorosamente le proporzioni native (nessuna distorsione).
  */
 async function placeImageOnPage(dataUrl, fileName = 'timbro.png') {
     const img = new Image();
@@ -81,9 +82,27 @@ async function placeImageOnPage(dataUrl, fileName = 'timbro.png') {
         finalDataUrl = offscreen.toDataURL('image/png');
     }
 
-    const aspect = (img.naturalWidth || 1) / (img.naturalHeight || 1);
-    const normW = 0.25;
-    const normH = normW / aspect;
+    // TEORIA DIDATTICA: Proporzioni e normalizzazione cartesiana sul foglio PDF
+    // normW e normH sono percentuali indipendenti rispetto alla larghezza e altezza del foglio.
+    // Per evitare la deformazione su fogli non quadrati (es. A4: 595x842 pt),
+    // dobbiamo compensare con il rapporto di forma del foglio (pageAspect = W_foglio / H_foglio):
+    // normH = (normW * pageAspect) / imgAspect
+    const overlay = document.getElementById('annotationOverlay');
+    const overlayW = overlay?.clientWidth || overlay?.offsetWidth || 595;
+    const overlayH = overlay?.clientHeight || overlay?.offsetHeight || 842;
+    const pageAspect = overlayW / overlayH;
+
+    const imgAspect = (img.naturalWidth || 1) / (img.naturalHeight || 1);
+
+    let normW = 0.30;
+    let normH = (normW * pageAspect) / imgAspect;
+
+    // Se l'immagine è verticale e troppo alta, limitiamo l'altezza al 35% del foglio
+    if (normH > 0.35) {
+        normH = 0.35;
+        normW = (normH * imgAspect) / pageAspect;
+    }
+
     const normX = Math.max(0, (1 - normW) / 2);
     const normY = Math.max(0, (1 - normH) / 2);
 
@@ -94,7 +113,7 @@ async function placeImageOnPage(dataUrl, fileName = 'timbro.png') {
         normY,
         normW,
         normH,
-        aspectRatio: aspect,
+        aspectRatio: imgAspect,
         fileName
     });
 

@@ -6,13 +6,12 @@ import { rotatePage, deletePage, reorderPage } from '../core/pdfModifier.js';
 let currentGenToken = 0;
 
 /**
- * Inizializza la lista delle miniature: crea i box istantaneamente e rasterizza in background
+ * Inizializza la lista delle miniature creando i contenitori e rasterizzando in modo progressivo
  */
 export async function generateThumbnails(containerElement) {
     if (!containerElement) return;
     const token = ++currentGenToken;
     containerElement.innerHTML = '';
-
     const cards = [];
     for (let i = 1; i <= State.totalPages; i++) {
         const card = createThumbnailCard(i, containerElement);
@@ -20,6 +19,7 @@ export async function generateThumbnails(containerElement) {
         cards.push(card);
     }
 
+    // Priorità di rasterizzazione alla pagina attualmente visualizzata
     const renderQueue = [State.currentPage, ...Array.from({ length: State.totalPages }, (_, i) => i + 1).filter(p => p !== State.currentPage)];
     for (const p of renderQueue) {
         if (token !== currentGenToken) break;
@@ -33,6 +33,9 @@ export async function generateThumbnails(containerElement) {
     }
 }
 
+/**
+ * Costruisce una card miniatura con azioni rapide (rotazione/elimina) e supporto Drag & Drop
+ */
 function createThumbnailCard(pageNum, container) {
     const card = document.createElement('div');
     card.className = `thumbnail-card ${pageNum === State.currentPage ? 'active' : ''}`;
@@ -51,7 +54,6 @@ function createThumbnailCard(pageNum, container) {
     card.addEventListener('click', (e) => {
         if (!e.target.closest('.thumb-btn')) setCurrentPage(pageNum);
     });
-
     card.querySelector('.btn-rotate').addEventListener('click', async (e) => {
         e.stopPropagation();
         await handleRotateFast(pageNum, card);
@@ -61,7 +63,7 @@ function createThumbnailCard(pageNum, container) {
         await handleDeleteFast(pageNum, container);
     });
 
-    // Eventi Drag & Drop
+    // Eventi Drag & Drop per il riordino visuale delle pagine nel documento
     card.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', String(pageNum - 1)); card.classList.add('dragging'); });
     card.addEventListener('dragend', () => card.classList.remove('dragging'));
     card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('drag-over'); });
@@ -77,9 +79,7 @@ function createThumbnailCard(pageNum, container) {
                 await loadPdf(safeBytes);
                 updateDocumentBytes(safeBytes, { targetPage: pageNum });
                 generateThumbnails(container);
-            } catch (err) {
-                console.error("Errore riordino pagine:", err);
-            }
+            } catch (err) { console.error("Errore riordino pagine:", err); }
         }
     });
 
@@ -87,7 +87,7 @@ function createThumbnailCard(pageNum, container) {
 }
 
 /**
- * Rotazione chirurgica: aggiorna solo la pagina corrente e la sua miniatura senza ricreare tutto
+ * Rotazione chirurgica di una singola pagina con aggiornamento immediato di viewport e miniatura
  */
 async function handleRotateFast(pageNum, card) {
     try {
@@ -99,20 +99,14 @@ async function handleRotateFast(pageNum, card) {
         if (pdfCanvas) await renderPage(State.currentPage, pdfCanvas, State.zoomScale);
         const canvas = card.querySelector('.thumbnail-canvas');
         if (canvas) await renderThumbnail(pageNum, canvas, 140);
-    } catch (err) {
-        console.error("Errore rotazione rapida:", err);
-        alert(`Impossibile ruotare: ${err.message || err}`);
-    }
+    } catch (err) { alert(`Impossibile ruotare: ${err.message || err}`); }
 }
 
 /**
- * Eliminazione veloce con ricarica
+ * Eliminazione rapida di una pagina dalla barra laterale con ricarica delle miniature
  */
 async function handleDeleteFast(pageNum, container) {
-    if (State.totalPages <= 1) {
-        alert("Impossibile eliminare l'unica pagina del documento.");
-        return;
-    }
+    if (State.totalPages <= 1) { alert("Impossibile eliminare l'unica pagina."); return; }
     if (!confirm(`Confermi l'eliminazione della Pagina ${pageNum}?`)) return;
     try {
         const newBytes = await deletePage(State.pdfBytes, pageNum);
@@ -124,14 +118,11 @@ async function handleDeleteFast(pageNum, container) {
         const pdfCanvas = document.getElementById('pdfCanvas');
         if (pdfCanvas) await renderPage(State.currentPage, pdfCanvas, State.zoomScale);
         generateThumbnails(container);
-    } catch (err) {
-        console.error("Errore eliminazione rapida:", err);
-        alert(`Impossibile eliminare: ${err.message || err}`);
-    }
+    } catch (err) { alert(`Impossibile eliminare: ${err.message || err}`); }
 }
 
 /**
- * Evidenzia visivamente la miniatura attiva
+ * Evidenzia visivamente la miniatura corrispondente alla pagina attiva nel viewport
  */
 export function updateActiveThumbnail(activePageNum) {
     document.querySelectorAll('.thumbnail-card').forEach(card => {
@@ -139,4 +130,14 @@ export function updateActiveThumbnail(activePageNum) {
         card.classList.toggle('active', isActive);
         if (isActive) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
+}
+
+/**
+ * Ridisegna istantaneamente la miniatura della pagina per riflettere annotazioni ed immagini
+ */
+export async function refreshPageThumbnail(pageNum) {
+    const card = document.querySelector(`.thumbnail-card[data-page-num="${pageNum}"]`);
+    if (!card) return;
+    const canvas = card.querySelector('.thumbnail-canvas');
+    if (canvas) await renderThumbnail(pageNum, canvas, 140);
 }

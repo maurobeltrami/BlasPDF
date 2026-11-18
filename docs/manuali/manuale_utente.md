@@ -110,8 +110,24 @@ Puoi inserire timbri, loghi o immagini grafiche direttamente sopra le pagine del
 * **Come Inserire:** Clicca sul pulsante **`🖼️ Immagine`** nella barra superiore e seleziona il file desiderato.
 * **Spostamento e Ridimensionamento:**
   * Seleziona lo strumento **`👆 Cursore`** per posizionare l'immagine con precisione millimetrica sul foglio.
-  * Usa le 4 **maniglie d'angolo** per ridimensionare l'immagine preservando rigorosamente le proporzioni originali (*aspect-ratio lock*).
-* **Eliminazione Rapida:** Clicca sul pulsante rosso **`✕`** posizionato in alto a destra sull'immagine (oppure selezionala e premi `Canc` / `Backspace` sulla tastiera).
+  * Usa le 4 **maniglie d'angolo** per ridimensionare l'immagine preservando rigorosamente le proporzioni originali senza alcuna distorsione (*aspect-ratio lock*).
+* **Barra Comandi Rapidi Fluttuante:**
+  Quando l'immagine è selezionata, compare una comoda barra superiore con comandi rapidi:
+  * **↔️ Centra Orizzontalmente:** allinea l'immagine al centro dell'asse X della pagina.
+  * **↕️ Centra Verticalmente:** allinea l'immagine al centro dell'asse Y della pagina.
+  * **🎯 Centra nella Pagina:** combina la centratura orizzontale e verticale.
+  * **📏 Adatta Larghezza:** allarga l'immagine al 90% della larghezza del foglio preservando il rapporto di forma.
+  * **🔍 Dimensione 100%:** ripristina la scala proporzionale standard dell'immagine.
+  * **🔄 Ruota 90°:** ruota i pixel dell'immagine in senso orario riadattando il riquadro di selezione.
+  * **🪞 Capovolgi Orizzontale:** specchia l'immagine a specchio sull'asse orizzontale.
+  * **📑 Duplica:** crea istantaneamente una copia esatta dell'immagine posizionata leggermente sfalsata.
+  * **✕ Elimina:** rimuove l'immagine (disponibile anche tramite tasto `Canc` / `Backspace`).
+* **Anteprima Reattiva nella Barra Laterale Sinistra:**
+  * Qualsiasi immagine inserita, spostata, ridimensionata o ruotata viene renderizzata istantaneamente in miniatura anche nella colonna delle anteprime di pagina a sinistra.
+* **Conferma nell'Anteprima (Clic Fuori):**
+  * Quando hai posizionato e dimensionato l'immagine, **fai clic in un punto qualsiasi fuori da essa** (sul foglio o sullo sfondo): i quadratini di ridimensionamento e la toolbar scompariranno. L'immagine rimarrà perfettamente confermata ed inglobata nel documento (puoi anche premere il tasto `Esc`).
+* **Riapertura della Modifica (Clic sull'Immagine):**
+  * Facendo clic sopra l'immagine confermata con lo strumento Cursore attivo, la sessione di modifica si riapre all'istante ripristinando maniglie e toolbar comandi.
 * **Baking Vettoriale:** Al momento del salvataggio con `💾 Salva`, l'immagine viene incorporata nativamente nella struttura interna del PDF come oggetto `/XObject`.
 
 ---
