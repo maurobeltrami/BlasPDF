@@ -55,7 +55,10 @@ Questo documento censisce, illustra e documenta formalmente tutte le tecnologie,
 
 ### 🖌️ CSS3 Modulare & Custom Properties
 * **Ruolo:** Stile grafico e Design System Dark Modern in stile BlasOpen.
-* **Organizzazione:** Suddivisione per responsabilità (`variables.css`, `layout.css`, `toolbar.css`, `imageTool.css`, `converter.css`, `themes/modern.css`).
+* **Organizzazione:** Suddivisione per responsabilità (`variables.css`, `layout.css`, `toast.css`, `thumbnails.css`, `toolbar.css`, `tools.css`, `textTool.css`, `imageTool.css`, `converter.css`, `themes/modern.css`).
+
+### 🔄 Disaccoppiamento Centro Conversioni
+* **Organizzazione:** Vista a schede e dashboard separate in `converterManager.js`, mentre i flussi batch locali (`Immagini ➔ PDF`, `PDF ➔ Immagini`, `PDF ➔ Testo`, `Ottimizza PDF`) sono isolati in `converterActions.js` nel rispetto del limite di 150 righe.
 
 ---
 

@@ -7,13 +7,13 @@ Questo documento definisce in modo dettagliato i requisiti architetturali, i flu
 ## ✅ 1. Inserimento Immagini Multi-formato (COMPLETATO v1.1.0)
 * **Formati Supportati:** `.png` (con trasparenza 32-bit), `.jpg`/`.jpeg`, `.webp`, `.svg`, `.bmp`, `.gif`.
 * **Transcodifica in Memoria:** Normalizzazione automatica via `OffscreenCanvas` in `imageTool.js`.
-* **Manipolazione & Ridimensionamento:** Maniglie d'angolo `.resize-handle` per scaling proporzionale con aspect-ratio locking.
+* **Manipolazione & Ridimensionamento:** Maniglie d'angolo `.resize-handle` per scaling proporzionale con aspect-ratio locking e barra comandi contestuale fluttuante in `imageToolbar.js`.
 * **Baking Vettoriale Permanente:** Incorporamento nativo con `pdf-lib` via `doc.embedPng` e `doc.embedJpg` in `annotationBake.js`.
 
 ---
 
 ## ✅ 2. Centro Conversioni Locale (COMPLETATO v1.1.0)
-* **Navigazione a Schede:** Switch istantaneo tra `[ 📄 Editor ]` e `[ 🔄 Conversioni ]` gestito da `converterManager.js`.
+* **Navigazione a Schede:** Switch istantaneo tra `[ 📄 Editor ]` e `[ 🔄 Conversioni ]` gestito da `converterManager.js` con azioni batch isolate in `converterActions.js`.
 * **A. 🖼️ Immagini ➔ PDF:** Batch conversione immagini con orientamento configurabile in `imagesToPdf.js`.
 * **B. 📸 PDF ➔ Immagini:** Rasterizzazione ad alta definizione (150 DPI) in PNG con `pdfToImages.js`.
 * **C. 📝 PDF ➔ Testo:** Estrazione massiva strutturata in `.txt` / `.md` con `pdfToText.js`.

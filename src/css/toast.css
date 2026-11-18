@@ -1,0 +1,84 @@
+/* toast.css - Stili dedicati al sistema di notifiche Toast non bloccanti */
+
+/* Contenitore fisso nell'angolo inferiore destro sopra ogni overlay */
+.blas-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+/* Singolo banner Toast con animazione fluida di ingresso e uscita */
+.blas-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #1e222b;
+    color: #f0f3f8;
+    border: 1px solid #3b4255;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    font-size: 13px;
+    line-height: 1.4;
+    max-width: 420px;
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.blas-toast.visible {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.blas-toast.hiding {
+    transform: translateY(10px) scale(0.95);
+    opacity: 0;
+}
+
+.blas-toast-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.blas-toast-text {
+    flex: 1;
+    word-break: break-word;
+}
+
+.blas-toast-close {
+    background: transparent;
+    border: none;
+    color: #9aa2b2;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.blas-toast-close:hover {
+    color: #f0f3f8;
+}
+
+/* Varianti semantiche per stato di successo, errore o avviso */
+.blas-toast-success {
+    border-color: rgba(46, 196, 182, 0.5);
+    background: #132726;
+}
+
+.blas-toast-error {
+    border-color: rgba(230, 57, 70, 0.5);
+    background: #2b1619;
+}
+
+.blas-toast-warning {
+    border-color: rgba(255, 183, 3, 0.5);
+    background: #2b2314;
+}
